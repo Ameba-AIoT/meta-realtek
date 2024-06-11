@@ -1,0 +1,35 @@
+From 3e97bcc763984fb9b35aabd3591fb557a57b3571 Mon Sep 17 00:00:00 2001
+From: lisa_xu <lisa_xu@realsil.com.cn>
+Date: Tue, 16 Apr 2024 11:02:30 +0800
+Subject: [PATCH 4/4] [PATCH] openthread makefile add macro for testharness
+
+verification:
+test run ok.
+---
+ third_party/openthread/CMakeLists.txt | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/third_party/openthread/CMakeLists.txt b/third_party/openthread/CMakeLists.txt
+index 03ad863352..3b0e09bc95 100644
+--- a/third_party/openthread/CMakeLists.txt
++++ b/third_party/openthread/CMakeLists.txt
+@@ -104,6 +104,16 @@ target_compile_definitions(ot-config INTERFACE
+     "-DOPENTHREAD_CONFIG_MLE_STEERING_DATA_SET_OOB_ENABLE=1"
+     "-DOPENTHREAD_CONFIG_TCP_ENABLE=0"
+     "-DOPENTHREAD_POSIX_CONFIG_FILE=\"${PROJECT_BINARY_DIR}/src/agent/openthread-otbr-posix-config.h\""
++    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_ACK_TIMEOUT_ENABLE=0"
++    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_RETRANSMIT_ENABLE=1"
++    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_CSMA_BACKOFF_ENABLE=0"
++    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE=1"
++    "-DOPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS=160"
++    "-DOPENTHREAD_CONFIG_MLE_IP_ADDRS_PER_CHILD=6"
++    "-DOPENTHREAD_CONFIG_TMF_ADDRESS_CACHE_ENTRIES=32"
++    "-DOPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD=2000"
++    "-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000"
++    "-DOPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE=1"
+ )
+ 
+ if (NOT OT_THREAD_VERSION STREQUAL "1.1")
+-- 
+2.17.1
+

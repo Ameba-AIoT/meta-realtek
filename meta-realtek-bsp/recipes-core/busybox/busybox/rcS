@@ -1,0 +1,18 @@
+#!/bin/sh
+echo "Welcome to RTL8730ELH Recovery"
+
+mkdir -p /rom/mnt
+mkdir -p /proc
+mkdir -p /tmp
+mkdir -p /sys
+mkdir -p /mnt
+mount -t ubifs ubi0_0 /rom/mnt
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /tmp
+cat /etc/motd
+
+if [ -e /bin/recovery ]; then
+    recovery
+fi

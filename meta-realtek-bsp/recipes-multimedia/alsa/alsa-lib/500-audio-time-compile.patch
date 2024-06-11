@@ -1,0 +1,13 @@
+--- a/test/Makefile.am
++++ b/test/Makefile.am
+@@ -3,7 +3,9 @@ SUBDIRS=. lsb
+ check_PROGRAMS=control pcm pcm_min latency seq \
+ 	       playmidi1 timer rawmidi midiloop \
+ 	       oldapi queue_timer namehint client_event_filter \
+-	       chmap audio_time user-ctl-element-set pcm-multi-thread
++	       chmap user-ctl-element-set pcm-multi-thread
++
++bin_PROGRAMS=audio_time
+ 
+ control_LDADD=../src/libasound.la
+ pcm_LDADD=../src/libasound.la

@@ -1,0 +1,12 @@
+# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
+
+# Wireless interfaces
+auto wlan0
+iface wlan0 inet dhcp
+	wireless_mode 0
+	wireless_essid any
+	wpa-driver nl80211
+	wpa-conf /etc/wpa_supplicant.conf
+
+# The loopback interface
+up ifconfig lo up

@@ -1,0 +1,65 @@
+SUMMARY = "Firmware for Realtek Ameba"
+DESCRIPTION = "Firmware for Realtek Ameba"
+SECTION = "BSP"
+HOMEPAGE = ""
+LICENSE = "CLOSED"
+
+inherit externalsrc
+
+EXTERNALSRC = "${RTKDIR}/firmware"
+S = "${EXTERNALSRC}"
+
+FIRMWARE_TARGET = "realtek_amebaD2_va0_example"
+FIRMWARE_PROJECT = "${S}/project/${FIRMWARE_TARGET}"
+FIRMWARE_HP_SRC = "${S}/project/${FIRMWARE_TARGET}/GCC-RELEASE/project_hp"
+FIRMWARE_LP_SRC = "${S}/project/${FIRMWARE_TARGET}/GCC-RELEASE/project_lp"
+FIRMWARE_OUT = "${FIRMWARE_HP_SRC}/asdk/image"
+
+CFLAGS[unexport] = "1"
+LDFLAGS[unexport] = "1"
+AS[unexport] = "1"
+LD[unexport] = "1"
+
+EXTRA_OEMAKE = ""
+
+do_compile() {
+    unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+
+    cd ${S}/component/soc/amebad2/fwlib/include; git checkout -- ameba_soc.h
+    sed -i 's/\/\/#define CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN/g' ${S}/component/soc/amebad2/fwlib/include/ameba_soc.h
+
+    cd ${FIRMWARE_PROJECT}; git checkout -- inc/inc_hp/platform_autoconf.h
+    sed -i '/#define CONFIG_WLAN 1/d' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '/#define CONFIG_AS_INIC_NP 1/d' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '/#undef  CONFIG_SINGLE_CORE_WIFI/d' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '/0,#undef  CONFIG_HIGH_TP_TEST/d' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '/#define CONFIG_MBED_TLS_ENABLED 1/d' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '$a#undef  CONFIG_WLAN' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    sed -i '$a#undef  CONFIG_MBED_TLS_ENABLED' ${FIRMWARE_PROJECT}/inc/inc_hp/platform_autoconf.h
+    cd ${FIRMWARE_PROJECT}; git checkout -- GCC-RELEASE/auto_build/config/.config_hp
+    sed -i '/CONFIG_WLAN=y/d' ${FIRMWARE_PROJECT}/GCC-RELEASE/auto_build/config/.config_hp
+    sed -i '/CONFIG_AS_INIC_NP=y/d' ${FIRMWARE_PROJECT}/GCC-RELEASE/auto_build/config/.config_hp
+    sed -i '/CONFIG_MBED_TLS_ENABLED=y/d' ${FIRMWARE_PROJECT}/GCC-RELEASE/auto_build/config/.config_hp
+
+    make -C ${FIRMWARE_LP_SRC} -s xip
+    make -C ${FIRMWARE_HP_SRC} -s xip
+}
+
+do_install () {
+    cp -rf ${FIRMWARE_OUT}/km0_km4_app.bin ${D}
+    cp -rf ${FIRMWARE_OUT}/km4_boot_all.bin ${D}
+    cp -rf ${FIRMWARE_OUT}/km0_image2_all_origin.bin ${D}/km0_image2_all_origin.bin
+    cp -rf ${FIRMWARE_OUT}/km4_boot_all_origin.bin ${D}/km4_boot_all_origin.bin
+    cp -rf ${FIRMWARE_OUT}/km4_image2_all_origin.bin ${D}/km4_image2_all_origin.bin
+}
+
+do_deploy() {
+    install -d ${DEPLOY_DIR_IMAGE}/
+    cp -fr ${D}/km4_boot_all.bin ${DEPLOY_DIR_IMAGE}/
+    cp -fr ${D}/km0_km4_app.bin ${DEPLOY_DIR_IMAGE}/
+}
+addtask deploy after do_install
+
+FILES:${PN}+= "/"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"

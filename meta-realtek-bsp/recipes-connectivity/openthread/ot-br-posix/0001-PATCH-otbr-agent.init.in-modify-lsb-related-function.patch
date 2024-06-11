@@ -1,0 +1,103 @@
+From 080aa1b8632b8118edc7b0ca871af7156402bd71 Mon Sep 17 00:00:00 2001
+From: lisa_xu <lisa_xu@realsil.com.cn>
+Date: Thu, 14 Mar 2024 18:15:50 +0800
+Subject: [PATCH 1/4] [PATCH] otbr-agent.init.in modify lsb related functions
+
+lsb is not supported from yocto 3.0.
+verification:
+otbr testharness run ok.
+---
+ src/agent/otbr-agent.init.in | 46 ++++++++++++++++++++++++++++--------
+ 1 file changed, 36 insertions(+), 10 deletions(-)
+
+diff --git a/src/agent/otbr-agent.init.in b/src/agent/otbr-agent.init.in
+index 5c95f099f5..36540dcf74 100644
+--- a/src/agent/otbr-agent.init.in
++++ b/src/agent/otbr-agent.init.in
+@@ -47,8 +47,10 @@ PIDFILE=/var/run/otbr-agent.pid
+ 
+ AGENT_CONF=@CMAKE_INSTALL_FULL_SYSCONFDIR@/default/otbr-agent
+ 
+-. /lib/lsb/init-functions
+-. /lib/init/vars.sh
++#. /lib/lsb/init-functions
++#. /lib/init/vars.sh
++
++. /etc/init.d/functions
+ 
+ if [ -f $AGENT_CONF ]; then
+     . $AGENT_CONF
+@@ -58,27 +60,50 @@ start_agent()
+ {
+     if [ -e $PIDFILE ]; then
+         if $0 status > /dev/null ; then
+-            log_success_msg "$DESC already started; not starting."
++            echo "$DESC already started; not starting."
+             return
+         else
+-            log_success_msg "Removing stale PID file $PIDFILE."
++            echo "Removing stale PID file $PIDFILE."
+             rm -f $PIDFILE
+         fi
+     fi
+ 
+-    log_daemon_msg "Starting $DESC" "$NAME"
+     start-stop-daemon --start --quiet \
+         --pidfile $PIDFILE --make-pidfile \
+         -b --exec $DAEMON -- $OTBR_AGENT_OPTS
+-    log_end_msg $?
++    if [ "$?" = "0" ]; then                                                 
++        echo "Starting $DESC" "$NAME" "Succ"
++        return 0
++    else                                                                    
++        echo "Starting $DESC" "$NAME" "Fail"
++        return 1
++    fi 
+ }
+ 
+ stop_agent()
+ {
+-    log_daemon_msg "Stopping $DESC" "$NAME"
+     start-stop-daemon --stop --retry 5 --quiet --oknodo \
+         --pidfile $PIDFILE --remove-pidfile
+-    log_end_msg $?
++    if [ "$?" = "0" ]; then                                                 
++        echo "Stopping $DESC" "$NAME" "Succ"
++        return 0
++    else                                                                    
++        echo "Stopping $DESC" "$NAME" "Fail"
++        return 1
++    fi 
++}
++
++status_agent()
++{
++    start-stop-daemon --status --quiet \
++        --pidfile $PIDFILE --name $NAME
++    if [ "$?" = "0" ]; then                                                 
++        echo "$DESC" "$NAME" "is running"
++        return 0
++    else                                                                
++        echo "$DESC" "$NAME" "is not running"
++        return 1
++    fi 
+ }
+ 
+ case "$1" in
+@@ -93,10 +118,11 @@ case "$1" in
+         stop_agent
+         ;;
+     status)
+-        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
++        #status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
++        status_agent
+         ;;
+     *)
+-        log_action_msg "Usage: /etc/init.d/$NAME {start|stop|status|restart|reload|force-reload}"
++        echo "Usage: /etc/init.d/$NAME {start|stop|status|restart|reload|force-reload}"
+         exit 2
+         ;;
+ esac
+-- 
+2.17.1
+

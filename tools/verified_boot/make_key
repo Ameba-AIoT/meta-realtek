@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# Copyright (C) 2022 Realtek
+#
+
+SCRIPT_PATH=`dirname $0`
+KEY_DIR=$1
+
+if [ -z "$KEY_DIR" ]; then
+    cat <<EOF
+Usage: $0 <keydir>
+EOF
+    exit 1
+fi
+
+mkdir -p $KEY_DIR
+
+############################################################
+# Generate firmware key
+############################################################
+# 1. generate the root key used for km4 boot & cert
+$SCRIPT_PATH/elf2bin keypair ed25519 $KEY_DIR/root.key
+
+sleep 1
+
+# 2. generate the fw key to verify km4 app image
+$SCRIPT_PATH/elf2bin keypair ed25519 $KEY_DIR/fw.key
+
+
+############################################################
+# Generate linux vbmeta key
+############################################################
+# 1. generate rsa2048 key to sign vbmeta image
+openssl genrsa -out $KEY_DIR/vbmeta.priv.key 2048
+python2.7 $SCRIPT_PATH/avbtool extract_public_key --key $KEY_DIR/vbmeta.priv.key --output $KEY_DIR/vbmeta.pub.key
+
+# 2. get public key's sha256
+sha256sum -b $KEY_DIR/vbmeta.pub.key > $KEY_DIR/vbmeta.pub.sha256
+PUBK_HASH=$(cat $KEY_DIR/vbmeta.pub.sha256 | cut -c1-64)
+
+# 3. format pubk hash as elf2bin's json format
+echo '{' > $KEY_DIR/vbmeta.key
+echo -e '\t"algorithm":"none",' >> $KEY_DIR/vbmeta.key
+echo -e '\t"private key":"none",' >> $KEY_DIR/vbmeta.key
+echo -e '\t"public key":"none",' >> $KEY_DIR/vbmeta.key
+echo -e "\t\"public key hash\":\"$PUBK_HASH\"" >> $KEY_DIR/vbmeta.key
+echo '}' >> $KEY_DIR/vbmeta.key
+
+rm -rf $KEY_DIR/vbmeta.pub.sha256
+
+
+############################################################
+# Combine key as elf2bin's format
+############################################################
+ROOT_KEY=$(sed -n '2,5p' $KEY_DIR/root.key)
+FW_KEY=$(sed -n '2,5p' $KEY_DIR/fw.key)
+VBMETA_KEY=$(sed -n '2,5p' $KEY_DIR/vbmeta.key)
+
+echo "{" > $KEY_DIR/key.json
+
+echo '    "boot":' >> $KEY_DIR/key.json
+echo "    {" >> $KEY_DIR/key.json
+echo        "$ROOT_KEY" >> $KEY_DIR/key.json
+echo "    }," >> $KEY_DIR/key.json
+echo -e "\n" >> $KEY_DIR/key.json
+
+echo '    "cert":' >> $KEY_DIR/key.json
+echo "    {" >> $KEY_DIR/key.json
+echo        "$ROOT_KEY" >> $KEY_DIR/key.json
+echo "    }," >> $KEY_DIR/key.json
+echo -e "\n" >> $KEY_DIR/key.json
+
+echo '    "app":' >> $KEY_DIR/key.json
+echo "    {" >> $KEY_DIR/key.json
+echo        "$FW_KEY" >> $KEY_DIR/key.json
+echo "    }," >> $KEY_DIR/key.json
+echo -e "\n" >> $KEY_DIR/key.json
+
+echo '    "vbmeta":' >> $KEY_DIR/key.json
+echo "    {" >> $KEY_DIR/key.json
+echo        "$VBMETA_KEY" >> $KEY_DIR/key.json
+echo "    }" >> $KEY_DIR/key.json
+echo "}" >> $KEY_DIR/key.json
+
+echo -e "\n\n******* New key generated *******"
+echo "[root key]: $KEY_DIR/root.key"
+echo "[fw key]: $KEY_DIR/fw.key"
+echo "[vbmeta key]: $KEY_DIR/vbmeta.key"
+echo "              $KEY_DIR/vbmeta.priv.key(private key)"
+echo "              $KEY_DIR/vbmeta.pub.key(public key)"
+echo "[keys json]: $KEY_DIR/key.json"

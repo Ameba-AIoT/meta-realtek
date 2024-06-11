@@ -1,0 +1,396 @@
+From 84029ac39fcbaa2d1961380aa1a54368c9508139 Mon Sep 17 00:00:00 2001
+From: lisa_xu <lisa_xu@realsil.com.cn>
+Date: Tue, 16 Apr 2024 11:01:32 +0800
+Subject: [PATCH 3/4] [PATCH] scripts: use proper cmd&service in yocto platform
+
+verification:
+otbr test run ok.
+---
+ script/_border_routing | 14 +++++++++++++-
+ script/_firewall       |  4 ++++
+ script/_initrc         | 13 +++++++++----
+ script/_ipforward      | 13 ++++++++++++-
+ script/_nat64          |  4 ++--
+ script/_otbr           | 20 ++++++++++----------
+ script/_rt_tables      | 17 +++++++++++------
+ script/defaults        | 39 +++++++++++++++++++++++++++++++++++++++
+ script/otbr-firewall   |  4 ++--
+ script/server          | 23 ++++++++++++++---------
+ script/setup           |  6 +++---
+ 11 files changed, 119 insertions(+), 38 deletions(-)
+ create mode 100644 script/defaults
+
+diff --git a/script/_border_routing b/script/_border_routing
+index f17c8fe690..e82b7357a5 100644
+--- a/script/_border_routing
++++ b/script/_border_routing
+@@ -33,6 +33,8 @@
+ INFRA_IF_NAME="${INFRA_IF_NAME:-wlan0}"
+ readonly INFRA_IF_NAME
+ 
++SYSCTL_CONF="/etc/sysctl.conf"
++
+ SYSCTL_ACCEPT_RA_FILE="/etc/sysctl.d/60-otbr-accept-ra.conf"
+ readonly SYSCTL_ACCEPT_RA_FILE
+ 
+@@ -44,15 +46,25 @@ readonly DHCPCD_CONF_BACKUP_FILE
+ 
+ accept_ra_install()
+ {
+-    sudo tee $SYSCTL_ACCEPT_RA_FILE <<EOF
++    test ! -f $SYSCTL_ACCEPT_RA_FILE || sudo tee $SYSCTL_ACCEPT_RA_FILE <<EOF
++net.ipv6.conf.${INFRA_IF_NAME}.accept_ra = 2
++net.ipv6.conf.${INFRA_IF_NAME}.accept_ra_rt_info_max_plen = 64
++EOF
++
++    sudo tee -a $SYSCTL_CONF <<EOF
+ net.ipv6.conf.${INFRA_IF_NAME}.accept_ra = 2
+ net.ipv6.conf.${INFRA_IF_NAME}.accept_ra_rt_info_max_plen = 64
+ EOF
++
+ }
+ 
+ accept_ra_uninstall()
+ {
+     test ! -f $SYSCTL_ACCEPT_RA_FILE || sudo rm -v $SYSCTL_ACCEPT_RA_FILE
++
++    if [ -f /etc/sysctl.conf ]; then
++        sed -i '/accept_ra/d' /etc/sysctl.conf
++    fi
+ }
+ 
+ accept_ra_enable()
+diff --git a/script/_firewall b/script/_firewall
+index 0a29c3699c..67b21e9682 100755
+--- a/script/_firewall
++++ b/script/_firewall
+@@ -60,6 +60,8 @@ firewall_start()
+         service otbr-firewall start || die 'Failed to start firewall service'
+     elif have systemctl; then
+         sudo systemctl start otbr-firewall || die 'Failed to start firewall service'
++    elif have service; then
++        service otbr-firewall start || die 'Failed to start firewall service'
+     fi
+ }
+ 
+@@ -69,5 +71,7 @@ firewall_stop()
+         service otbr-firewall stop || true
+     elif have systemctl; then
+         sudo systemctl stop otbr-firewall || true
++    elif have service; then
++        service otbr-firewall stop || true
+     fi
+ }
+diff --git a/script/_initrc b/script/_initrc
+index 2ff3c84973..fe1899e804 100644
+--- a/script/_initrc
++++ b/script/_initrc
+@@ -31,6 +31,11 @@ set -euxo pipefail
+ 
+ cd "$(dirname "$0")/.."
+ 
++sudo()
++{
++    command $*
++}
++
+ die()
+ {
+     echo >&2 " *** ERROR:  $*"
+@@ -64,9 +69,9 @@ with()
+     local value
+     value=$(printenv "$1")
+     if [[ -z $value ]]; then
+-        if [[ -f examples/platforms/$PLATFORM/default ]]; then
++        if [[ -f script/defaults ]]; then
+             # shellcheck source=examples/platforms/raspbian/default
+-            value="$(. "examples/platforms/$PLATFORM/default" && eval echo "\${$1-}")"
++            value="$(. "script/defaults" && eval echo "\${$1-}")"
+         fi
+     fi
+ 
+@@ -120,8 +125,8 @@ BUILD_DIR=$PWD/build
+ export PATH=$STAGE_DIR/usr/bin:$STAGE_DIR/usr/sbin:$PATH
+ 
+ TASKNAME=$(basename "$0")
+-BEFORE_HOOK=examples/platforms/$PLATFORM/before_$TASKNAME
+-AFTER_HOOK=examples/platforms/$PLATFORM/after_$TASKNAME
++BEFORE_HOOK=script/before_$TASKNAME
++AFTER_HOOK=script/after_$TASKNAME
+ if [[ ! -f $BEFORE_HOOK ]]; then
+     BEFORE_HOOK=/dev/null
+ fi
+diff --git a/script/_ipforward b/script/_ipforward
+index 5bf8d2e35d..979aac96a0 100644
+--- a/script/_ipforward
++++ b/script/_ipforward
+@@ -30,11 +30,17 @@
+ #       This script manipulates ip forward configuration.
+ #
+ 
++SYSCTL_CONF=/etc/sysctl.conf
+ SYSCTL_IP_FORWARD=/etc/sysctl.d/60-otbr-ip-forward.conf
+ 
+ ipforward_install()
+ {
+-    sudo tee $SYSCTL_IP_FORWARD <<EOF
++    test ! -f $SYSCTL_IP_FORWARD || sudo tee $SYSCTL_IP_FORWARD <<EOF
++net.ipv6.conf.all.forwarding = 1
++net.ipv4.ip_forward = 1
++EOF
++
++    sudo tee -a $SYSCTL_CONF <<EOF
+ net.ipv6.conf.all.forwarding = 1
+ net.ipv4.ip_forward = 1
+ EOF
+@@ -49,6 +55,11 @@ EOF
+ ipforward_uninstall()
+ {
+     test ! -f $SYSCTL_IP_FORWARD || sudo rm -v $SYSCTL_IP_FORWARD
++
++    if [ -f /etc/sysctl.conf ]; then
++        sed -i '/^net.ipv6.conf.all.forwarding/d' /etc/sysctl.conf
++        sed -i '/^net.ipv4.ip_forward/d' /etc/sysctl.conf
++    fi
+ }
+ 
+ ipforward_enable()
+diff --git a/script/_nat64 b/script/_nat64
+index 521c4d2216..7ba53d23d0 100644
+--- a/script/_nat64
++++ b/script/_nat64
+@@ -144,8 +144,8 @@ nat44_install()
+ #                    to connect to arbitrary IPv4 endpoints.
+ ### END INIT INFO
+ 
+-. /lib/lsb/init-functions
+-. /lib/init/vars.sh
++#. /lib/lsb/init-functions
++#. /lib/init/vars.sh
+ 
+ case "\$1" in
+     start)
+diff --git a/script/_otbr b/script/_otbr
+index 790ab10ae9..82f3d28ede 100644
+--- a/script/_otbr
++++ b/script/_otbr
+@@ -48,12 +48,12 @@ otbr_uninstall()
+     fi
+     sudo killall otbr-web otbr-agent || true
+ 
+-    (
+-        if cd "${OTBR_TOP_BUILDDIR}"; then
+-            # shellcheck disable=SC2024
+-            sudo xargs rm <install_manifests.txt || true
+-        fi
+-    )
++#    (
++#        if cd "${OTBR_TOP_BUILDDIR}"; then
++#            # shellcheck disable=SC2024
++#            sudo xargs rm <install_manifests.txt || true
++#        fi
++#    )
+     if have systemctl; then
+         sudo systemctl daemon-reload
+     fi
+@@ -128,10 +128,10 @@ otbr_install()
+         )
+     fi
+ 
+-    (./script/cmake-build "${otbr_options[@]}" \
+-        && cd "${OTBR_TOP_BUILDDIR}" \
+-        && ninja \
+-        && sudo ninja install)
++#    (./script/cmake-build "${otbr_options[@]}" \
++#        && cd "${OTBR_TOP_BUILDDIR}" \
++#        && ninja \
++#        && sudo ninja install)
+ 
+     if have systemctl; then
+         sudo systemctl reload dbus
+diff --git a/script/_rt_tables b/script/_rt_tables
+index e6379838ae..c8355a9451 100644
+--- a/script/_rt_tables
++++ b/script/_rt_tables
+@@ -34,7 +34,12 @@ rt_tables_uninstall()
+ {
+     with BACKBONE_ROUTER || return 0
+ 
+-    sudo sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
++    sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
++
++    if [ -f /etc/sysctl.conf ]; then
++        sed -i '/^#/d' /etc/sysctl.conf
++        sed -i '/^net.core.optmem_max/d' /etc/sysctl.conf
++    fi
+ }
+ 
+ rt_tables_install()
+@@ -43,14 +48,14 @@ rt_tables_install()
+ 
+     rt_tables_uninstall
+ 
+-    sudo sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
++    sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
+ 
+     # Increase ancillary buffer size to allow for a larger number of multicast groups
+     # Required for NdProxyManager::JoinSolicitedNodeMulticastGroup
+     if without DOCKER; then
+-        sudo sh -c 'echo "" >>/etc/sysctl.conf'
+-        sudo sh -c 'echo "# OpenThread configuration" >>/etc/sysctl.conf'
+-        sudo sh -c 'echo "net.core.optmem_max=65536" >>/etc/sysctl.conf'
+-        sudo sh -c 'sysctl -p /etc/sysctl.conf'
++        sh -c 'echo "" >>/etc/sysctl.conf'
++        sh -c 'echo "# OpenThread configuration" >>/etc/sysctl.conf'
++        sh -c 'echo "net.core.optmem_max=65536" >>/etc/sysctl.conf'
++        sh -c 'sysctl -p /etc/sysctl.conf'
+     fi
+ }
+diff --git a/script/defaults b/script/defaults
+new file mode 100644
+index 0000000000..9d8f6312b5
+--- /dev/null
++++ b/script/defaults
+@@ -0,0 +1,39 @@
++#!/bin/sh
++#
++#  Copyright (c) 2017-2021, The OpenThread Authors.
++#  All rights reserved.
++#
++#  Redistribution and use in source and binary forms, with or without
++#  modification, are permitted provided that the following conditions are met:
++#  1. Redistributions of source code must retain the above copyright
++#     notice, this list of conditions and the following disclaimer.
++#  2. Redistributions in binary form must reproduce the above copyright
++#     notice, this list of conditions and the following disclaimer in the
++#     documentation and/or other materials provided with the distribution.
++#  3. Neither the name of the copyright holder nor the
++#     names of its contributors may be used to endorse or promote products
++#     derived from this software without specific prior written permission.
++#
++#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++#  POSSIBILITY OF SUCH DAMAGE.
++#
++
++# shellcheck disable=SC2034
++NAT64=1
++DNS64=0
++DHCPV6_PD=0
++NETWORK_MANAGER=0
++BACKBONE_ROUTER=1
++BORDER_ROUTING=1
++WEB_GUI=0
++REST_API=1
++FIREWALL=1
+\ No newline at end of file
+diff --git a/script/otbr-firewall b/script/otbr-firewall
+index 52cef42dd0..57631c8f68 100644
+--- a/script/otbr-firewall
++++ b/script/otbr-firewall
+@@ -41,8 +41,8 @@
+ THREAD_IF="wpan0"
+ OTBR_FORWARD_INGRESS_CHAIN="OTBR_FORWARD_INGRESS"
+ 
+-. /lib/lsb/init-functions
+-. /lib/init/vars.sh
++#. /lib/lsb/init-functions
++#. /lib/init/vars.sh
+ 
+ set -euxo pipefail
+ 
+diff --git a/script/server b/script/server
+index b4eaedfb9a..8e1cddbe2f 100755
+--- a/script/server
++++ b/script/server
+@@ -36,25 +36,30 @@
+ . script/_dns64
+ . script/_firewall
+ 
++SYSLOG_FOLDER="/var/volatile/log"
++AVAHI_DAEMON_PID_FILDER="/var/run/avahi-daemon"
++
+ startup()
+ {
+     # shellcheck source=/dev/null
+     . "$BEFORE_HOOK"
+-    sudo sysctl --system
++#    sudo sysctl --system
+     nat64_start || die 'Failed to start NAT64!'
+     dns64_start || die 'Failed to start DNS64!'
+     firewall_start || die 'Failed to start firewall'
+     if have systemctl; then
+-        systemctl is-active rsyslog || sudo systemctl start rsyslog || die 'Failed to start rsyslog!'
+-        systemctl is-active dbus || sudo systemctl start dbus || die 'Failed to start dbus!'
++        systemctl is-active syslog || sudo systemctl start syslog || die 'Failed to start syslog!'
++        systemctl is-active dbus-1 || sudo systemctl start dbus-1 || die 'Failed to start dbus-1!'
+         systemctl is-active avahi-daemon || sudo systemctl start avahi-daemon || die 'Failed to start avahi!'
+         without WEB_GUI || systemctl is-active otbr-web || sudo systemctl start otbr-web || die 'Failed to start otbr-web!'
+         systemctl is-active otbr-agent || sudo systemctl start otbr-agent || die 'Failed to start otbr-agent!'
+     elif have service; then
+-        sudo service rsyslog status || sudo service rsyslog start || die 'Failed to start rsyslog!'
+-        sudo service dbus status || sudo service dbus start || die 'Failed to start dbus!'
++        test -e $SYSLOG_FOLDER || mkdir $SYSLOG_FOLDER
++        sudo service syslog status || sudo service syslog start || die 'Failed to start syslog!'
++        sudo service dbus-1 status || sudo service dbus-1 start || die 'Failed to start dbus-1!'
+         # Tolerate the mdns failure as it is installed for only CI docker.
+         sudo service mdns status || sudo service mdns start || echo "service mdns is not available!"
++        test -e $AVAHI_DAEMON_PID_FILDER && rm -rf $AVAHI_DAEMON_PID_FILDER
+         sudo service avahi-daemon status || sudo service avahi-daemon start || die 'Failed to start avahi!'
+         sudo service otbr-agent status || sudo service otbr-agent start || die 'Failed to start otbr-agent!'
+         without WEB_GUI || sudo service otbr-web status || sudo service otbr-web start || die 'Failed to start otbr-web!'
+@@ -71,14 +76,14 @@ shutdown()
+     dns64_stop || echo 'Failed to stop DNS64!'
+     firewall_stop || echo 'Failed to stop firewall'
+     if have systemctl; then
+-        systemctl is-active rsyslog && sudo systemctl stop rsyslog || echo 'Failed to stop rsyslog!'
+-        systemctl is-active dbus && sudo systemctl stop dbus || echo 'Failed to stop dbus!'
++        systemctl is-active syslog && sudo systemctl stop syslog || echo 'Failed to stop syslog!'
++        systemctl is-active dbus-1 && sudo systemctl stop dbus-1 || echo 'Failed to stop dbus-1!'
+         systemctl is-active avahi-daemon && sudo systemctl stop avahi-daemon || echo 'Failed to stop avahi!'
+         without WEB_GUI || systemctl is-active otbr-web && sudo systemctl stop otbr-web || echo 'Failed to stop otbr-web!'
+         systemctl is-active otbr-agent && sudo systemctl stop otbr-agent || echo 'Failed to stop otbr-agent!'
+     elif have service; then
+-        sudo service rsyslog status && sudo service rsyslog stop || echo 'Failed to stop rsyslog!'
+-        sudo service dbus status && sudo service dbus stop || echo 'Failed to stop dbus!'
++        sudo service syslog status && sudo service syslog stop || echo 'Failed to stop syslog!'
++        sudo service dbus-1 status && sudo service dbus-1 stop || echo 'Failed to stop dbus-1!'
+         sudo service mdns status && sudo service mdns stop || echo "service mdns is not available!"
+         sudo service avahi-daemon status && sudo service avahi-daemon stop || echo 'Failed to stop avahi!'
+         sudo service otbr-agent status && sudo service otbr-agent stop || echo 'Failed to stop otbr-agent!'
+diff --git a/script/setup b/script/setup
+index 8262be89d2..15686ed73b 100755
+--- a/script/setup
++++ b/script/setup
+@@ -41,7 +41,7 @@
+ . script/_network_manager
+ . script/_rt_tables
+ . script/_swapfile
+-. script/_sudo_extend
++#. script/_sudo_extend
+ . script/_disable_services
+ . script/_firewall
+ 
+@@ -49,9 +49,9 @@ main()
+ {
+     # shellcheck source=/dev/null
+     . "$BEFORE_HOOK"
+-    extend_sudo_timeout
++    #extend_sudo_timeout
+     setup_swapfile
+-    disable_services
++    #disable_services
+     otbr_uninstall
+     border_routing_uninstall
+     network_manager_uninstall
+-- 
+2.17.1
+
