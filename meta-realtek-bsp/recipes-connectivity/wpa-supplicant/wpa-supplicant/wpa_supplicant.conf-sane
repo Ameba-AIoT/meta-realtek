@@ -2049,9 +2049,6 @@ fast_reauth=1
 wowlan_triggers=any
 
 ctrl_interface=/var/run/wpa_supplicant
-network={
-    key_mgmt=NONE
-}
 
 # Universally Unique IDentifier (UUID; see RFC 4122) of the device
 # If not configured, UUID will be generated based on the mechanism selected with
