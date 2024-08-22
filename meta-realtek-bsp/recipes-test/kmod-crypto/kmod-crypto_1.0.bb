@@ -3,7 +3,7 @@ require recipes-test/kmod-common/kmod-common.inc
 SUMMARY = "Kernel module crypto test for Realtek Ameba"
 DESCRIPTION = "Kernel module crypto test for Realtek Ameba"
 
-EXTERNALSRC = "${RTKDIR}/tests/crypto/"
+EXTERNALSRC = "${RTKDIR}/tests/crypto"
 S = "${EXTERNALSRC}"
 
 do_install () {
