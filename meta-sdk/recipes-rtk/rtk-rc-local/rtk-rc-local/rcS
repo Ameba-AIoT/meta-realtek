@@ -10,7 +10,11 @@
 # bits.
 #
 # By default this script does nothing.
-echo "Welcome to RTL8730ELH"
+if [ -e /dev/ubi0_0 ]; then
+    echo "Welcome to RTL8730ELH"
+else
+    echo "Welcome to RTL8730EAH"
+fi
 
 cat /etc/motd
 

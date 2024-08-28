@@ -40,7 +40,6 @@ RDEPENDS:${PN} = "\
     rtk-app-drm-vbl-test \
     rtk-app-cpu-test \
     rtk-app-system-timer-test \
-    rtk-gui \
     kmod-crypto \
     kmod-timer \
     kmod-hello-module \

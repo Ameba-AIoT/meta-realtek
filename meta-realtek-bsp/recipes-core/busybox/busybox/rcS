@@ -6,13 +6,20 @@ mkdir -p /proc
 mkdir -p /tmp
 mkdir -p /sys
 mkdir -p /mnt
-mount -t ubifs ubi0_0 /rom/mnt
+
 mount -t devtmpfs devtmpfs /dev
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t tmpfs tmpfs /tmp
+
+if [ -e /dev/ubi0_0 ]; then
+    mount -t ubifs ubi0_0 /rom/mnt
+else
+    mount -t jffs2 /dev/mtdblock5 /rom/mnt
+fi
+
 cat /etc/motd
 
 if [ -e /bin/recovery ]; then
-    recovery
+    recovery > /dev/ttyS0
 fi
