@@ -8,7 +8,6 @@ inherit packagegroup
 RDEPENDS:${PN} = "\
     efuse \
     otp-ipc \
-    recovery-test \
     captouch \
     getevent \
 "

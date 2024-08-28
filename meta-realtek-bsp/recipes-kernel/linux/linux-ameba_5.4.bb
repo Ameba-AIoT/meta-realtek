@@ -13,6 +13,7 @@ FILESEXTRAPATHS:prepend := "${RTKDIR}/kernel/linux-5.4:"
 EXTERNALSRC = "${RTKDIR}/kernel/linux-5.4"
 S = "${EXTERNALSRC}"
 
+KBUILD_DEFCONFIG:rtl8730eah-va6 ?= "rtl8730elh_defconfig"
 KBUILD_DEFCONFIG:rtl8730elh-va7 ?= "rtl8730elh_defconfig"
 KBUILD_DEFCONFIG:rtl8730elh-va8 ?= "rtl8730elh_defconfig"
 KBUILD_DEFCONFIG:rtl8730elh-recovery ?= "rtl8730elh_recovery_defconfig"
