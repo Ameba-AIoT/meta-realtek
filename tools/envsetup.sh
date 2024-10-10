@@ -235,8 +235,8 @@ function m()
         cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.squashfs ${deploy_dir}/rootfs.img
         cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.jffs2 ${deploy_dir}/userdata.img
     else
-        cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.ubi ${deploy_dir}/rootfs.img
-        cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.ubi ${deploy_dir}/userdata.img
+        cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.ubi ${deploy_dir}/rootfs.img
+        cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.ubi ${deploy_dir}/userdata.img
     fi
 }
 
@@ -504,7 +504,7 @@ function setup_oe_build_env()
         build_dir=${ROOTDIR}/build
     fi
 
-    export TEMPLATECONF=${RTK_META_DIR}/meta-sdk/conf
+    export TEMPLATECONF=${RTK_META_DIR}/meta-sdk/conf/templates/my-template
     . ${OEROOT_DIR}/oe-init-build-env $build_dir > /dev/null
 
     cp ${TEMPLATECONF}/site.conf.sample ${build_dir}/conf/site.conf

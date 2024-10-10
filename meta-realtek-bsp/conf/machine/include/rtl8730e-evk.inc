@@ -2,6 +2,7 @@ MACHINEOVERRIDES =. "rtl8730e:"
 
 DEFAULTTUNE ?= "cortexa32"
 include conf/machine/include/arm/armv8a/tune-cortexa32.inc
+TUNE_FEATURES:tune-cortexa32 = "armv8a cortexa32 crc callconvention-hard neon"
 
 IMAGE_FSTYPES += "tar.bz2 ubi"
 #MACHINE_ESSENTIAL_EXTRA_RDEPENDS += "kernel-image kernel-devicetree"
@@ -20,7 +21,7 @@ SERIAL_CONSOLES ?= "115200;ttyS0 115200;ttyO0 115200;ttyAMA0"
 #SERIAL_CONSOLES_CHECK = "${SERIAL_CONSOLES}"
 
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-ameba"
-PREFERRED_VERSION_linux-yocto ?= "5.4%"
+PREFERRED_VERSION_linux-yocto ?= "6.6%"
 
 KERNEL_IMAGETYPE = "uImage"
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
