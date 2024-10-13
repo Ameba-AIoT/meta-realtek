@@ -1,0 +1,1 @@
+../../../../firmware/tools/image_scripts/axf2bin.py

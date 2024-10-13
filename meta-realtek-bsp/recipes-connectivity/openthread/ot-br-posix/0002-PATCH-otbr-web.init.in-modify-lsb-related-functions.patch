@@ -1,0 +1,103 @@
+From 3777bbe26f70ce36d1aa906e268b4235e04d14b8 Mon Sep 17 00:00:00 2001
+From: lisa_xu <lisa_xu@realsil.com.cn>
+Date: Thu, 14 Mar 2024 18:17:06 +0800
+Subject: [PATCH 2/4] [PATCH] otbr-web.init.in modify lsb related functions
+
+lsb is not supported from yocto 3.0.
+verification:
+not tested, just modify first.
+---
+ src/web/otbr-web.init.in | 48 ++++++++++++++++++++++++++++++----------
+ 1 file changed, 36 insertions(+), 12 deletions(-)
+
+diff --git a/src/web/otbr-web.init.in b/src/web/otbr-web.init.in
+index be901d023e..60d1d9f218 100755
+--- a/src/web/otbr-web.init.in
++++ b/src/web/otbr-web.init.in
+@@ -47,8 +47,8 @@ PIDFILE=/var/run/otbr-web.pid
+ 
+ OTBR_WEB_CONF=@CMAKE_INSTALL_FULL_SYSCONFDIR@/default/otbr-web
+ 
+-. /lib/lsb/init-functions
+-. /lib/init/vars.sh
++#. /lib/lsb/init-functions
++#. /lib/init/vars.sh
+ 
+ if [ -f $OTBR_WEB_CONF ]; then
+     . $OTBR_WEB_CONF
+@@ -58,27 +58,51 @@ start_web()
+ {
+     if [ -e $PIDFILE ]; then
+         if $0 status > /dev/null ; then
+-            log_success_msg "$DESC already started; not starting."
++            echo "$DESC already started; not starting."
+             return
+         else
+-            log_success_msg "Removing stale PID file $PIDFILE."
++            echo "Removing stale PID file $PIDFILE."
+             rm -f $PIDFILE
+         fi
+     fi
+ 
+-    log_daemon_msg "Starting $DESC" "$NAME"
+     start-stop-daemon --start --quiet \
+         --pidfile $PIDFILE --make-pidfile \
+         -b --exec $DAEMON -- $OTBR_WEB_OPTS
+-    log_end_msg $?
++    if [ "$?" = "0" ]; then                                                 
++        echo "Starting $DESC" "$NAME" "Succ"
++        return 0
++    else                                                                    
++        echo "Starting $DESC" "$NAME" "Fail"
++        return 1
++    fi
+ }
+ 
+ stop_web()
+ {
+-    log_daemon_msg "Stopping $DESC" "$NAME"
+-    start-stop-daemon --stop --retry 5 --quiet --oknodo \
+-        --pidfile $PIDFILE --remove-pidfile
+-    log_end_msg $?
++    start-stop-daemon --status --quiet \
++        --pidfile $PIDFILE --name $NAME
++    if [ "$?" = "0" ]; then                                                 
++        echo "$DESC" "$NAME" "is running"
++        return 0
++    else                                                                
++        echo "$DESC" "$NAME" "is not running"
++        return 1
++    fi 
++}
++
++status_web()
++{
++    start-stop-daemon -K -t --quiet \
++        --pidfile $PIDFILE --name $NAME
++    if [ "$?" = "0" ]; then                                                 
++        echo "$DESC" "$NAME" "is running"
++        return 0
++    else                                                                    
++        echo "$DESC" "$NAME" "is stopped"
++        return 1
++    fi 
++    
+ }
+ 
+ case "$1" in
+@@ -93,10 +117,10 @@ case "$1" in
+         stop_web
+         ;;
+     status)
+-        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
++        status_web
+         ;;
+     *)
+-        log_action_msg "Usage: /etc/init.d/$NAME {start|stop|status|restart|reload|force-reload}"
++        echo "Usage: /etc/init.d/$NAME {start|stop|status|restart|reload|force-reload}"
+         exit 2
+         ;;
+ esac
+-- 
+2.17.1
+

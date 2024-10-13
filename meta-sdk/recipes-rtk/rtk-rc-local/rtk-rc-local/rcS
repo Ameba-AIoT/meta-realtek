@@ -1,0 +1,38 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+if [ -e /dev/ubi0_0 ]; then
+    echo "Welcome to RTL8730ELH"
+else
+    echo "Welcome to RTL8730EAH"
+fi
+
+cat /etc/motd
+
+# Set country to Worldwide
+#iw reg set 00
+
+# Enable udhcpd when start hostapd automatically
+#if [ -e /var/run/hostapd/wlan1 ]; then
+#    ifconfig wlan1 192.168.43.1
+#    udhcpd -S /etc/udhcpd.conf
+#fi
+
+# Enable pipewire and wireplumber
+#if [ -e /usr/bin/pipewire ]; then
+#    mkdir -p /run/pipewire
+#    export XDG_RUNTIME_DIR='/run/pipewire/'
+#    export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+#    ./usr/bin/pipewire -c /usr/share/pipewire/pipewire.conf &
+#fi
+
+exit 0

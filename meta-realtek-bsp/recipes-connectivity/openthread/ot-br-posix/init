@@ -1,0 +1,38 @@
+#!/bin/sh
+DAEMON=/usr/bin/otbr/script/server
+NAME=otbr
+DESC="OTBR AUTOSTART"
+ARGS=
+
+test -f $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+    start)	
+		if [ -e /etc/init.d/otbr-firewall ]; then
+			echo "$NAME servers start..."
+			./usr/bin/otbr/script/server >/dev/null 2>&1
+		elif [ -e /usr/bin/otbr/script/setup ]; then
+			echo "$NAME setup config..."
+			./usr/bin/otbr/script/setup >/dev/null 2>&1
+		fi
+
+		;;
+    stop)
+		if [ -e /etc/init.d/otbr-firewall ]; then
+			echo "$NAME servers down..."
+			./usr/bin/otbr/script/server shutdown >/dev/null 2>&1
+		fi
+		
+		;;
+    restart|reload|status)
+		echo "not supported..."
+		;;
+    *)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+		;;
+esac
+
+exit 0

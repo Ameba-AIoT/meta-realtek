@@ -1,0 +1,24 @@
+From dbffe8c00d65b513e7a297e3d79388e9932d91f6 Mon Sep 17 00:00:00 2001
+From: ZivLowRTK <zivlow@realtek-sg.com>
+Date: Tue, 27 Aug 2024 18:31:10 +0000
+Subject: [PATCH] enable experimental and disable battery plugin
+
+---
+ init | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/init b/init
+index ca9fa18..e0a6482 100644
+--- a/init
++++ b/init
+@@ -11,7 +11,9 @@ DAEMON=@LIBEXECDIR@/bluetooth/bluetoothd
+ # If you want to be ignore error of "org.freedesktop.hostname1",
+ # please enable NOPLUGIN_OPTION.
+ # NOPLUGIN_OPTION="--noplugin=hostname"
+-NOPLUGIN_OPTION=""
++
++# Disable battery plugin for Matter device and Apple HomeKit commissioning via BLE to work
++NOPLUGIN_OPTION="--experimental --noplugin=battery"
+ SSD_OPTIONS="--oknodo --quiet --exec $DAEMON -- $NOPLUGIN_OPTION"
+ 
+ test -f $DAEMON || exit 0

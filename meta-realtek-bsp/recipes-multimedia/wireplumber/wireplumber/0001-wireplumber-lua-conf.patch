@@ -1,0 +1,39 @@
+diff --git a/main.conf b/main.conf
+index e822f02..c4d05ed 100644
+--- a/main.conf
++++ b/main.conf
+@@ -19,7 +19,7 @@ context.spa-libs = {
+   # that factory.
+   #
+   api.alsa.*      = alsa/libspa-alsa
+-  api.v4l2.*      = v4l2/libspa-v4l2
++  #api.v4l2.*      = v4l2/libspa-v4l2
+   audio.convert.* = audioconvert/libspa-audioconvert
+   support.*       = support/libspa-support
+ }
+diff --git a/main.lua.d/90-enable-all.lua b/main.lua.d/90-enable-all.lua
+index d518805..b3ebe19 100644
+--- a/main.lua.d/90-enable-all.lua
++++ b/main.lua.d/90-enable-all.lua
+@@ -7,7 +7,7 @@ default_access.enable()
+ 
+ -- Load devices
+ alsa_monitor.enable()
+-v4l2_monitor.enable()
++-- v4l2_monitor.enable()
+ 
+ -- Track/store/restore user choices about devices
+ device_defaults.enable()
+diff --git a/wireplumber.conf b/wireplumber.conf
+index 060ad11..ba77cce 100644
+--- a/wireplumber.conf
++++ b/wireplumber.conf
+@@ -21,7 +21,7 @@ context.spa-libs = {
+   #
+   api.alsa.*      = alsa/libspa-alsa
+   api.bluez5.*    = bluez5/libspa-bluez5
+-  api.v4l2.*      = v4l2/libspa-v4l2
++  #api.v4l2.*      = v4l2/libspa-v4l2
+   api.libcamera.* = libcamera/libspa-libcamera
+   audio.convert.* = audioconvert/libspa-audioconvert
+   support.*       = support/libspa-support
