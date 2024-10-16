@@ -10,14 +10,14 @@ otbr test run ok.
  script/_firewall       |  4 ++++
  script/_initrc         | 13 +++++++++----
  script/_ipforward      | 13 ++++++++++++-
- script/_nat64          |  4 ++--
+ script/_nat64          |  8 ++++++--
  script/_otbr           | 20 ++++++++++----------
  script/_rt_tables      | 17 +++++++++++------
  script/defaults        | 39 +++++++++++++++++++++++++++++++++++++++
  script/otbr-firewall   |  4 ++--
  script/server          | 23 ++++++++++++++---------
  script/setup           |  6 +++---
- 11 files changed, 119 insertions(+), 38 deletions(-)
+ 11 files changed, 123 insertions(+), 38 deletions(-)
  create mode 100644 script/defaults
 
 diff --git a/script/_border_routing b/script/_border_routing
@@ -170,6 +170,24 @@ index 521c4d2216..7ba53d23d0 100644
  
  case "\$1" in
      start)
+@@ -206,6 +206,8 @@ nat44_start()
+         service otbr-nat44 start || die 'Failed to start NAT44!'
+     elif have systemctl; then
+         sudo systemctl start otbr-nat44 || die 'Failed to start NAT44!'
++    elif have service; then
++        sudo service otbr-nat44 start || die 'Failed to start NAT44!' 
+     fi
+ }
+ 
+@@ -215,6 +217,8 @@ nat44_stop()
+         service otbr-nat44 stop || true
+     elif have systemctl; then
+         sudo systemctl stop otbr-nat44 || true
++    elif have service; then
++        sudo service otbr-nat44 stop || true
+     fi
+ }
+ 
 diff --git a/script/_otbr b/script/_otbr
 index 790ab10ae9..82f3d28ede 100644
 --- a/script/_otbr
