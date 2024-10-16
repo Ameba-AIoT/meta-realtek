@@ -18,13 +18,21 @@ fi
 
 cat /etc/motd
 
-#set country to Worldwide
-#iw reg set WW
+# Set country to Worldwide
+#iw reg set 00
 
-#enable udhcpd when start hostapd automatically
+# Enable udhcpd when start hostapd automatically
 #if [ -e /var/run/hostapd/wlan1 ]; then
 #    ifconfig wlan1 192.168.43.1
 #    udhcpd -S /etc/udhcpd.conf
+#fi
+
+# Enable pipewire and wireplumber
+#if [ -e /usr/bin/pipewire ]; then
+#    mkdir -p /run/pipewire
+#    export XDG_RUNTIME_DIR='/run/pipewire/'
+#    export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+#    ./usr/bin/pipewire -c /usr/share/pipewire/pipewire.conf &
 #fi
 
 exit 0

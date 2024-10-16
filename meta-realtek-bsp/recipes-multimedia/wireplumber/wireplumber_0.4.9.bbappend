@@ -1,6 +1,10 @@
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
+SRC_URI:prepend = " \
+    file://0001-wireplumber-lua-conf.patch;patchdir=src/config \
+"
+
 RDEPENDS:libwireplumber += " \
     ${PN}-modules-default-nodes-api \
     ${PN}-modules-mixer-api \

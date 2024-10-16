@@ -1,0 +1,61 @@
+diff --git a/bluetooth.conf b/bluetooth.conf
+index 27d0aee3f..5ee886d40 100644
+--- a/bluetooth.conf
++++ b/bluetooth.conf
+@@ -19,7 +19,7 @@ context.spa-libs = {
+   # regular expression to a library name that should contain
+   # that factory.
+   #
+-  api.bluez5.*    = bluez5/libspa-bluez5
++  #api.bluez5.*    = bluez5/libspa-bluez5
+   audio.convert.* = audioconvert/libspa-audioconvert
+   support.*       = support/libspa-support
+ }
+diff --git a/bluetooth.lua.d/90-enable-all.lua b/bluetooth.lua.d/90-enable-all.lua
+index a515d5299..b198879ad 100644
+--- a/bluetooth.lua.d/90-enable-all.lua
++++ b/bluetooth.lua.d/90-enable-all.lua
+@@ -1 +1 @@
+-bluez_monitor.enable()
++-- bluez_monitor.enable()
+diff --git a/main.conf b/main.conf
+index e822f020d..c4d05ed04 100644
+--- a/main.conf
++++ b/main.conf
+@@ -19,7 +19,7 @@ context.spa-libs = {
+   # that factory.
+   #
+   api.alsa.*      = alsa/libspa-alsa
+-  api.v4l2.*      = v4l2/libspa-v4l2
++  #api.v4l2.*      = v4l2/libspa-v4l2
+   audio.convert.* = audioconvert/libspa-audioconvert
+   support.*       = support/libspa-support
+ }
+diff --git a/main.lua.d/90-enable-all.lua b/main.lua.d/90-enable-all.lua
+index d518805c0..b3ebe1951 100644
+--- a/main.lua.d/90-enable-all.lua
++++ b/main.lua.d/90-enable-all.lua
+@@ -7,7 +7,7 @@ default_access.enable()
+ 
+ -- Load devices
+ alsa_monitor.enable()
+-v4l2_monitor.enable()
++-- v4l2_monitor.enable()
+ 
+ -- Track/store/restore user choices about devices
+ device_defaults.enable()
+diff --git a/wireplumber.conf b/wireplumber.conf
+index 35958585e..a7da0dd60 100644
+--- a/wireplumber.conf
++++ b/wireplumber.conf
+@@ -20,8 +20,8 @@ context.spa-libs = {
+   # that factory.
+   #
+   api.alsa.*      = alsa/libspa-alsa
+-  api.bluez5.*    = bluez5/libspa-bluez5
+-  api.v4l2.*      = v4l2/libspa-v4l2
++  #api.bluez5.*    = bluez5/libspa-bluez5
++  #api.v4l2.*      = v4l2/libspa-v4l2
+   api.libcamera.* = libcamera/libspa-libcamera
+   audio.convert.* = audioconvert/libspa-audioconvert
+   support.*       = support/libspa-support
