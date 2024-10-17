@@ -1,0 +1,22 @@
+From 41fa57a967230e863dd1bfc086943d04e2ce1d3f Mon Sep 17 00:00:00 2001
+From: ZivLowRTK <zivlow@realtek-sg.com>
+Date: Tue, 27 Aug 2024 17:26:49 +0000
+Subject: [PATCH] eloop epoll use default select
+
+---
+ defconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/defconfig b/defconfig
+index 3e835a4..753c738 100644
+--- a/defconfig
++++ b/defconfig
+@@ -295,7 +295,7 @@ CONFIG_BACKEND=file
+ #CONFIG_ELOOP_POLL=y
+ 
+ # Should we use epoll instead of select? Select is used by default.
+-CONFIG_ELOOP_EPOLL=y
++#CONFIG_ELOOP_EPOLL=y
+ 
+ # Should we use kqueue instead of select? Select is used by default.
+ #CONFIG_ELOOP_KQUEUE=y

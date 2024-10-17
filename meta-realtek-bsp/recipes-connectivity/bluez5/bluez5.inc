@@ -55,6 +55,7 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://0001-tests-add-a-target-for-building-tests-without-runnin.patch \
            file://0001-test-gatt-Fix-hung-issue.patch \
            file://0004-src-shared-util.c-include-linux-limits.h.patch \
+           ${@bb.utils.contains('DISTRO_FEATURES', 'matter', 'file://0001-enable-experimental-and-disable-battery-plugin.patch;patchdir=${WORKDIR}', '', d)} \
            "
 S = "${WORKDIR}/bluez-${PV}"
 

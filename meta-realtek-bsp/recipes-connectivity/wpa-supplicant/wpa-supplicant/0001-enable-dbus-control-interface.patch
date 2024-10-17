@@ -1,0 +1,39 @@
+From e30d1ccff351aec26dc63414997efb38be8801d0 Mon Sep 17 00:00:00 2001
+From: ZivLowRTK <zivlow@realtek-sg.com>
+Date: Tue, 27 Aug 2024 17:22:21 +0000
+Subject: [PATCH] enable dbus control interface
+
+---
+ defconfig         | 4 ++--
+ wpa-supplicant.sh | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/defconfig b/defconfig
+index 553c50d..3e835a4 100644
+--- a/defconfig
++++ b/defconfig
+@@ -372,10 +372,10 @@ CONFIG_INTERNAL_LIBTOMMATH_FAST=y
+ 
+ # Add support for new DBus control interface
+ # (fi.w1.hostap.wpa_supplicant1)
+-#CONFIG_CTRL_IFACE_DBUS_NEW=y
++CONFIG_CTRL_IFACE_DBUS_NEW=y
+ 
+ # Add introspection support for new DBus control interface
+-#CONFIG_CTRL_IFACE_DBUS_INTRO=y
++CONFIG_CTRL_IFACE_DBUS_INTRO=y
+ 
+ # Add support for loading EAP methods dynamically as shared libraries.
+ # When this option is enabled, each EAP method can be either included
+diff --git a/wpa-supplicant.sh b/wpa-supplicant.sh
+index 35a1aa6..fa451d8 100644
+--- a/wpa-supplicant.sh
++++ b/wpa-supplicant.sh
+@@ -5,7 +5,7 @@ WPA_SUP_BIN="/usr/sbin/wpa_supplicant"
+ WPA_SUP_PNAME="wpa_supplicant"
+ WPA_SUP_PIDFILE="/var/run/wpa_supplicant.$IFACE.pid"
+ WPA_COMMON_CTRL_IFACE="/var/run/wpa_supplicant"
+-WPA_SUP_OPTIONS="-B -P $WPA_SUP_PIDFILE -i $IFACE"
++WPA_SUP_OPTIONS="-B -P $WPA_SUP_PIDFILE -u -i $IFACE"
+ 
+ VERBOSITY=0
