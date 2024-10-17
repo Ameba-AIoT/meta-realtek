@@ -24,4 +24,5 @@ RDEPENDS:libpipewire += " \
     ${PN}-spa-plugins-audioconvert \
     ${PN}-spa-plugins-alsa \
     ${PN}-spa-plugins-bluez5 \
+    ${PN}-spa-plugins-codec-bluez5-sbc \
 "
