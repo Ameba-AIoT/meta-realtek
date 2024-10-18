@@ -285,7 +285,7 @@ function mfw()
     fi
 
     local fw_build=${ROOTDIR}/sources/yocto/meta-realtek/tools/firmware.sh
-    local fw_source=${ROOTDIR}/sources/firmware
+    local fw_source=${ROOTDIR}/sources/firmware/source
     local fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image
     local mp_fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image_mp
     local loader_bin_dir=$fw_source/amebasmart_gcc_project/project_hp/asdk/gnu_utility/image_tool_flashloader/amebasmart_acut
