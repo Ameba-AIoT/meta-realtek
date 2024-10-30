@@ -1,5 +1,7 @@
 export PATH
 
+KERNEL_VERSION=`cat /proc/version | awk '{print $3}'`
+
 function insmod_ko()
 {
     if [ ! -e "$1" ]; then
@@ -15,76 +17,76 @@ function insmod_ko()
 
 function insmod_otg_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/storage/usb-storage.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_hid.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function insmod_usbh_msc_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/storage/usb-storage.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function insmod_usbd_adb_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_hid.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function insmod_usbd_cdc_acm_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/u_serial.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_acm.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/u_serial.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_acm.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function insmod_usbd_hid_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_hid.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function insmod_usbd_msc_ko()
 {
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/5.4.63/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/gadget/function/usb_f_mass_storage.ko
-    insmod_ko /lib/modules/5.4.63/kernel/drivers/usb/dwc2/dwc2.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_mass_storage.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
 function mount_configfs()
