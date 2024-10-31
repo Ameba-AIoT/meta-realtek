@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=87109e44b2fda96a8991f27684a7349c \
                     file://third_party/openthread/repo/LICENSE;md5=543b6fe90ec5901a683320a36390c65f \
                     "
 DEPENDS += "protobuf-native protobuf"
-SRCREV = "790dc775144e33995cd1cb2c15b348849cacf737"
+SRCREV = "055ceb42645feb95aeaebe6b81e4619f82a281a5"
 
 SRC_URI += "file://0001-PATCH-otbr-agent.init.in-modify-lsb-related-function.patch \
 		   file://0002-PATCH-otbr-web.init.in-modify-lsb-related-functions.patch \
