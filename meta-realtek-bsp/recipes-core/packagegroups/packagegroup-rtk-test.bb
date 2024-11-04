@@ -17,6 +17,7 @@ RDEPENDS:${PN} = "\
     rtk-app-ir-test \
     rtk-app-ledc-test \
     rtk-app-misc-test \
+    rtk-app-pm-voltage-test \
     rtk-app-pm-wakelock-test \
     rtk-app-pm-wakeup-count-test \
     rtk-app-pwm-test \
