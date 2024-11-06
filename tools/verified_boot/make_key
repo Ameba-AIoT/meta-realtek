@@ -19,12 +19,12 @@ mkdir -p $KEY_DIR
 # Generate firmware key
 ############################################################
 # 1. generate the root key used for km4 boot & cert
-python3 $SCRIPT_PATH/axf2bin.py keypair ed25519 $KEY_DIR/root.key
+$SCRIPT_PATH/elf2bin keypair ed25519 $KEY_DIR/root.key
 
 sleep 1
 
 # 2. generate the fw key to verify km4 app image
-python3 $SCRIPT_PATH/axf2bin.py keypair ed25519 $KEY_DIR/fw.key
+$SCRIPT_PATH/elf2bin keypair ed25519 $KEY_DIR/fw.key
 
 
 ############################################################

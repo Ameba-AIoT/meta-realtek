@@ -9,7 +9,7 @@ do_compile[depends] += "u-boot-ameba:do_deploy optee-os-ameba:do_deploy"
 inherit deploy
 inherit externalsrc
 
-AXF2BIN = "${RTKDIR}/yocto/meta-realtek/tools/verified_boot/axf2bin.py"
+ELF2BIN = "${RTKDIR}/yocto/meta-realtek/tools/verified_boot/elf2bin"
 
 # requires CROSS_COMPILE set by hand as there is no configure script
 export CROSS_COMPILE="${TARGET_PREFIX}"
@@ -66,7 +66,7 @@ do_compile() {
         > boot_orig.img
 
     # use the dummy manifest and key to create boot image
-    python3 ${AXF2BIN} manifest manifest.json key.json boot_orig.img manifest.bin app
+    ${ELF2BIN} manifest manifest.json key.json boot_orig.img manifest.bin app
     cat manifest.bin boot_orig.img > boot.img
 }
 

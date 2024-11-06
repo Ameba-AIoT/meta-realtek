@@ -7,7 +7,7 @@ PROGNAME="mksecure.sh"
 
 SCRIPT_PATH=`dirname $0`
 
-AXF2BIN=$SCRIPT_PATH/axf2bin.py
+ELF2BIN=$SCRIPT_PATH/elf2bin
 AVBTOOL=$SCRIPT_PATH/avbtool
 
 OUTPUT_DIR=images
@@ -454,7 +454,7 @@ function make_secure_firmware()
     # cut the original manifest head to remake it
     tail -c +4097 $KM4_BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin
 
-    python3 $AXF2BIN manifest \
+    $ELF2BIN manifest \
         $KEY_DIR/manifest.json \
         $KEY_DIR/manifest.json \
         $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin \
@@ -472,14 +472,14 @@ function make_secure_firmware()
     # cut the original manifest and cert head to remake it
     tail -c +8193 $KM4_APP_IMAGE > $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin
 
-    python3 $AXF2BIN manifest \
+    $ELF2BIN manifest \
         $KEY_DIR/manifest.json \
         $KEY_DIR/manifest.json \
         $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin \
         $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin \
         app
 
-    python3 $AXF2BIN cert \
+    $ELF2BIN cert \
         $KEY_DIR/manifest.json \
         $KEY_DIR/manifest.json \
         $OUTPUT_DIR/secure-auxiliary/cert.bin \
@@ -499,7 +499,7 @@ function make_secure_firmware()
     # cut the original manifest head to remake it
     tail -c +4097 $BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/boot.img
 
-    python3 $AXF2BIN manifest \
+    $ELF2BIN manifest \
         $KEY_DIR/manifest.json \
         $KEY_DIR/manifest.json \
         $OUTPUT_DIR/secure-auxiliary/boot.img \
@@ -519,7 +519,7 @@ function make_secure_firmware()
     fi
     head -zc -4096 $IMGTOOL_FLASHLODER_IMG > $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin
 
-    python3 $AXF2BIN manifest \
+    $ELF2BIN manifest \
         $KEY_DIR/manifest.json \
         $KEY_DIR/manifest.json \
         $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin \
