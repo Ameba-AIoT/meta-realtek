@@ -4,9 +4,9 @@ DESCRIPTION = "Linux Kernel 6.6"
 SECTION = "kernel"
 LICENSE = "GPL-2.0-only"
 
-FILESEXTRAPATHS:prepend := "${RTKDIR}/kernel/linux:"
+FILESEXTRAPATHS:prepend := "${RTKDIR}/kernel/linux-6.6:"
 
-EXTERNALSRC = "${RTKDIR}/kernel/linux"
+EXTERNALSRC = "${RTKDIR}/kernel/linux-6.6"
 S = "${EXTERNALSRC}"
 
 KBUILD_DEFCONFIG:rtl8730elh-va7 ?= "rtl8730elh_defconfig"
