@@ -15,40 +15,14 @@ function insmod_ko()
     fi
 }
 
-function insmod_otg_ko()
-{
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
-}
-
 function insmod_usbh_msc_ko()
 {
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
-}
-
-function insmod_usbd_adb_ko()
-{
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
@@ -57,6 +31,7 @@ function insmod_usbd_cdc_acm_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
@@ -70,6 +45,7 @@ function insmod_usbd_hid_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
@@ -82,6 +58,7 @@ function insmod_usbd_msc_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
@@ -113,41 +90,6 @@ function mount_configfs()
     fi
 
     return 0
-}
-
-function usbd_acc_init()
-{
-    echo "ACC init"
-
-    mount_configfs
-
-    cd /mnt/config/usb_gadget
-    mkdir acc > /dev/null 2>&1
-    cd acc
-    echo 0x0200 > bcdUSB
-
-    echo 64 > bMaxPacketSize0
-
-    #adb will filter devices according to bDeviceClass, bDeviceSubClass and bDeviceProtocol
-    echo 0xff > bDeviceClass
-    echo 0x42 > bDeviceSubClass
-    echo 0x01 > bDeviceProtocol
-
-    echo 0x0BDA > idVendor
-    echo 0x8730 > idProduct
-
-    mkdir strings/0x409 > /dev/null 2>&1
-    echo "Realtek" > strings/0x409/manufacturer
-    echo "ADB Interface" > strings/0x409/product
-    cat /proc/realtek/uuid > strings/0x409/serialnumber
-
-    mkdir configs/c.1 > /dev/null 2>&1
-    echo 120 > configs/c.1/MaxPower
-    mkdir configs/c.1/strings/0x409 > /dev/null 2>&1
-    echo "accessary" > configs/c.1/strings/0x409/configuration
-
-    mkdir functions/accessory.adb > /dev/null 2>&1
-    ln -sf functions/accessory.adb configs/c.1/
 }
 
 function usbd_cdc_acm_init()
@@ -266,10 +208,8 @@ function usb_usage()
 {
     echo "Usage: $0 <mode>"
     echo "Where mode:"
-    echo "    otg      - OTG mode"
     echo "    usbh_msc - MSC host"
     echo "    usbd_acm - CDC ACM device"
-    echo "    usbd_adb - ADB device"
     echo "    usbd_hid - HID device"
     echo "    usbd_msc - MSC device"
 }
@@ -280,13 +220,6 @@ if [ $# -lt 1 ]; then
 fi
 
 case $1 in
-    "otg")
-        insmod_otg_ko
-        deactive_device
-        usbd_acc_init
-        active_device
-        /bin/adbd &
-        ;;
     "usbh_msc")
         insmod_usbh_msc_ko
         ;;
@@ -295,13 +228,6 @@ case $1 in
         deactive_device
         usbd_cdc_acm_init
         active_device
-        ;;
-    "usbd_adb")
-        insmod_usbd_adb_ko
-        deactive_device
-        usbd_acc_init
-        active_device
-        /bin/adbd &
         ;;
     "usbd_hid")
         insmod_usbd_hid_ko
