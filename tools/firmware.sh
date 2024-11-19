@@ -20,12 +20,20 @@ function bak_config()
         cp -f ${CONFIG_DIR}/.config_hp ${CONFIG_DIR}/.config_hp.bak; \
     fi
 
+    if [ ! -e ${CONFIG_DIR}/.config_ap.bak ]; then \
+        cp -f ${CONFIG_DIR}/.config_ap ${CONFIG_DIR}/.config_ap.bak; \
+    fi
+
     if [ ! -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
         cp -f ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak; \
     fi
 
     if [ ! -e ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ]; then \
         cp -f ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak; \
+    fi
+
+    if [ ! -e ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ]; then \
+        cp -f ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak; \
     fi
 }
 
@@ -37,10 +45,11 @@ function enable_linux_config()
     sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config
     sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_lp
     sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_hp
+    sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_ap
 
     sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
     sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-
+    sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
 }
 
 function enable_mp_config
@@ -50,16 +59,20 @@ function enable_mp_config
     sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config
     sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_lp
     sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_hp
+    sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_ap
 
     sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config
     sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_lp
     sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_hp
+    sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_ap
 
     sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
     sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
+    sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
 
     sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
     sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
+    sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
 }
 
 function disable_mp_config
@@ -69,16 +82,20 @@ function disable_mp_config
     sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config
     sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_lp
     sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_hp
+    sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_ap
 
     sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config
     sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_lp
     sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_hp
+    sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_ap
 
     sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
     sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
+    sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
 
     sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
     sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
+    sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
 }
 
 function reset_config
@@ -96,8 +113,8 @@ function reset_config
         mv -f ${CONFIG_DIR}/.config_hp.bak ${CONFIG_DIR}/.config_hp; \
     fi
 
-    if [ -e ${CONFIG_DIR}/.config_hp.bak ]; then \
-        mv -f ${CONFIG_DIR}/.config_hp.bak ${CONFIG_DIR}/.config_hp; \
+    if [ -e ${CONFIG_DIR}/.config_ap.bak ]; then \
+        mv -f ${CONFIG_DIR}/.config_ap.bak ${CONFIG_DIR}/.config_ap; \
     fi
 
     if [ -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
@@ -107,6 +124,10 @@ function reset_config
     if [ -e ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ]; then \
         mv -f ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h; \
     fi
+
+    if [ -e ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ]; then \
+        mv -f ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h; \
+    fi
 }
 
 function build_firmware
@@ -115,7 +136,9 @@ function build_firmware
     enable_linux_config
     disable_mp_config
 
-    make -C ${GCCPROJECT_DIR} -s all
+    cd ${GCCPROJECT_DIR}
+    ./build.py
+    cd -
 }
 
 function build_mp_firmware
@@ -124,20 +147,26 @@ function build_mp_firmware
     enable_linux_config
     enable_mp_config
 
-    make -C ${GCCPROJECT_DIR} -s all
+    cd ${GCCPROJECT_DIR}
+    ./build.py
+    cd -
 }
 
 function make_firmware_menuconfig
 {
     bak_config
-    make -C ${GCCPROJECT_DIR} -s menuconfig
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py
+    cd -
 }
 
 function clean_firmware
 {
     reset_config
 
-    make -C ${GCCPROJECT_DIR} -s clean
+    cd ${GCCPROJECT_DIR}
+    ./build.py -c
+    cd -
 }
 
 usage() {

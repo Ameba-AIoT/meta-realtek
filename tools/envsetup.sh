@@ -219,11 +219,11 @@ function m()
     bitbake -f ameba-image-userdata
     if [ $? -ne 0 ]; then
         echo_error "***************************************"
-        echo_error "* Build ameba-image-userdata rrror!!!"
+        echo_error "* Build ameba-image-userdata error!!!"
         echo_error "***************************************"
         return
     fi
-    
+
     local deploy_dir=${BUILDDIR}/tmp/deploy/images/${TARGET_MACHINE}
 
     rm -rf ${ROOTDIR}/images
