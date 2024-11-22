@@ -252,7 +252,7 @@ fi
 
 if [ -z "$ROOTFS_IMAGE" ]; then
     cd $INPUT_DIR
-    DEFAULT_ROOTFS_IMAGE=$(grep -rl --include="*.rootfs.squashfs" .)
+    DEFAULT_ROOTFS_IMAGE=$(find -iname *.rootfs.squashfs)
     ROOTFS_IMAGE=$INPUT_DIR$SLASH_CHAR$DEFAULT_ROOTFS_IMAGE
     cd -
     #echo "Use rootfs image: $ROOTFS_IMAGE"
