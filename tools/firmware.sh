@@ -6,6 +6,12 @@
 #
 # Copyright (c) 2023 Realtek, LLC.
 
+function touch_para()
+{
+    rm -f ${PARA_FILEDIR}/${PARA_FILENAME}
+    touch ${PARA_FILEDIR}/${PARA_FILENAME}
+}
+
 function bak_config()
 {
     if [ ! -e ${CONFIG_DIR}/.config.bak ]; then \
@@ -42,60 +48,30 @@ function enable_linux_config()
 {
     echo "Enable linux config"
 
-    sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config
-    sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_lp
-    sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_hp
-    sed -i 's/^# CONFIG_LINUX_FW_EN is not set/CONFIG_LINUX_FW_EN=y/g' ${CONFIG_DIR}/.config_ap
-
-    sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
-    sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-    sed -i 's/^#undef  CONFIG_LINUX_FW_EN/#define CONFIG_LINUX_FW_EN 1/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
+    echo "LINUX_FW_EN=y" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py -f ${PARA_FILENAME}
+    cd -
 }
 
 function enable_mp_config
 {
     echo "Enable firmware MP config"
 
-    sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config
-    sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_lp
-    sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_hp
-    sed -i '/^# CONFIG_MP_INCLUDED is not set/a CONFIG_MP_SHRINK=y' ${CONFIG_DIR}/.config_ap
-
-    sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config
-    sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_lp
-    sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_hp
-    sed -i 's/^# CONFIG_MP_INCLUDED is not set/CONFIG_MP_INCLUDED=y/g' ${CONFIG_DIR}/.config_ap
-
-    sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
-    sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-    sed -i '/^#undef  CONFIG_MP_INCLUDED/a #define CONFIG_MP_SHRINK 1' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
-
-    sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
-    sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-    sed -i 's/^#undef  CONFIG_MP_INCLUDED/#define CONFIG_MP_INCLUDED 1/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
+    echo "MP_INCLUDED=y" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py -f ${PARA_FILENAME}
+    cd -
 }
 
 function disable_mp_config
 {
     echo "Disable firmware MP config"
 
-    sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config
-    sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_lp
-    sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_hp
-    sed -i 's/^CONFIG_MP_INCLUDED=y/# CONFIG_MP_INCLUDED is not set/g' ${CONFIG_DIR}/.config_ap
-
-    sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config
-    sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_lp
-    sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_hp
-    sed -i '/^CONFIG_MP_SHRINK=y/d' ${CONFIG_DIR}/.config_ap
-
-    sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
-    sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-    sed -i 's/^#define CONFIG_MP_INCLUDED 1/#undef  CONFIG_MP_INCLUDED/g' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
-
-    sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h
-    sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h
-    sed -i '/^#define CONFIG_MP_SHRINK 1/d' ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h
+    echo "MP_INCLUDED=n" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py -f ${PARA_FILENAME}
+    cd -
 }
 
 function reset_config
@@ -133,6 +109,7 @@ function reset_config
 function build_firmware
 {
     bak_config
+    touch_para
     enable_linux_config
     disable_mp_config
 
@@ -144,6 +121,7 @@ function build_firmware
 function build_mp_firmware
 {
     bak_config
+    touch_para
     enable_linux_config
     enable_mp_config
 
@@ -207,7 +185,8 @@ fi
 
 GCCPROJECT_DIR=${FW_SRC_DIR}/amebasmart_gcc_project
 CONFIG_DIR=${GCCPROJECT_DIR}/menuconfig
-
+PARA_FILEDIR=${CONFIG_DIR}/confs_daily_build
+PARA_FILENAME=linux_para.conf
 
 if [ "$BUILD_TARGET" = "wifi" ]; then
     build_firmware
