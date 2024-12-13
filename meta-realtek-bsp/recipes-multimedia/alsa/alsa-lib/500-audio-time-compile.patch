@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/test/Makefile.am
 +++ b/test/Makefile.am
 @@ -3,7 +3,9 @@ SUBDIRS=. lsb

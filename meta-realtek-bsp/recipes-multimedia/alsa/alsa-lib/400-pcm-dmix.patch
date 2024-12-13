@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/src/pcm/pcm_dmix.c
 +++ b/src/pcm/pcm_dmix.c
 @@ -161,7 +161,10 @@ static void mix_areas(snd_pcm_direct_t *dmix,

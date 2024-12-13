@@ -5,6 +5,7 @@ LICENSE = "MIT"
 IMAGE_INSTALL += " \
     packagegroup-core-boot \
     kmod-hello-module \
+    alsa-lib \
 "
 
 inherit core-image
