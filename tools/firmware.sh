@@ -18,16 +18,16 @@ function bak_config()
         cp -f ${CONFIG_DIR}/.config ${CONFIG_DIR}/.config.bak; \
     fi
 
-    if [ ! -e ${CONFIG_DIR}/.config_lp.bak ]; then \
-        cp -f ${CONFIG_DIR}/.config_lp ${CONFIG_DIR}/.config_lp.bak; \
+    if [ ! -e ${CONFIG_DIR}/.config_km0.bak ]; then \
+        cp -f ${CONFIG_DIR}/.config_km0 ${CONFIG_DIR}/.config_km0.bak; \
     fi
 
-    if [ ! -e ${CONFIG_DIR}/.config_hp.bak ]; then \
-        cp -f ${CONFIG_DIR}/.config_hp ${CONFIG_DIR}/.config_hp.bak; \
+    if [ ! -e ${CONFIG_DIR}/.config_km4.bak ]; then \
+        cp -f ${CONFIG_DIR}/.config_km4 ${CONFIG_DIR}/.config_km4.bak; \
     fi
 
-    if [ ! -e ${CONFIG_DIR}/.config_ap.bak ]; then \
-        cp -f ${CONFIG_DIR}/.config_ap ${CONFIG_DIR}/.config_ap.bak; \
+    if [ ! -e ${CONFIG_DIR}/.config_ca32.bak ]; then \
+        cp -f ${CONFIG_DIR}/.config_ca32 ${CONFIG_DIR}/.config_ca32.bak; \
     fi
 
     if [ ! -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
@@ -81,16 +81,16 @@ function reset_config
         mv -f ${CONFIG_DIR}/.config.bak ${CONFIG_DIR}/.config; \
     fi
 
-    if [ -e ${CONFIG_DIR}/.config_lp.bak ]; then \
-        mv -f ${CONFIG_DIR}/.config_lp.bak ${CONFIG_DIR}/.config_lp; \
+    if [ -e ${CONFIG_DIR}/.config_km0.bak ]; then \
+        mv -f ${CONFIG_DIR}/.config_km0.bak ${CONFIG_DIR}/.config_km0; \
     fi
 
-    if [ -e ${CONFIG_DIR}/.config_hp.bak ]; then \
-        mv -f ${CONFIG_DIR}/.config_hp.bak ${CONFIG_DIR}/.config_hp; \
+    if [ -e ${CONFIG_DIR}/.config_km4.bak ]; then \
+        mv -f ${CONFIG_DIR}/.config_km4.bak ${CONFIG_DIR}/.config_km4; \
     fi
 
-    if [ -e ${CONFIG_DIR}/.config_ap.bak ]; then \
-        mv -f ${CONFIG_DIR}/.config_ap.bak ${CONFIG_DIR}/.config_ap; \
+    if [ -e ${CONFIG_DIR}/.config_ca32.bak ]; then \
+        mv -f ${CONFIG_DIR}/.config_ca32.bak ${CONFIG_DIR}/.config_ca32; \
     fi
 
     if [ -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
