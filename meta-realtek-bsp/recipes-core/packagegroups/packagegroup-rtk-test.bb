@@ -32,11 +32,6 @@ RDEPENDS:${PN} = "\
     rtk-app-watchdog-test \
     rtk-benchmark-stream \
     rtk-benchmark-lmbench \
-    rtk-app-drm-mode-test \
-    rtk-app-drm-mode-print \
-    rtk-app-drm-prop-test \
-    rtk-app-drm-kms-test \
-    rtk-app-drm-libkms-test \
     rtk-app-drm-vbl-test \
     rtk-app-cpu-test \
     rtk-app-system-timer-test \
