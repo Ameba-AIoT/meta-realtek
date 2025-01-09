@@ -526,9 +526,9 @@ function make_secure_firmware()
         $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin \
         boot
 
-    cat $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin > $OUTPUT_DIR/floader_rtl8730e.bin
+    cat $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin > $OUTPUT_DIR/floader_amebasmart.bin
 
-    echo_info "=> Install: $OUTPUT_DIR/floader_rtl8730e.bin"
+    echo_info "=> Install: $OUTPUT_DIR/floader_amebasmart.bin"
 }
 
 echo

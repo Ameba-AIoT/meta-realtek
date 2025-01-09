@@ -32,7 +32,7 @@ $SCRIPT_PATH/elf2bin keypair ed25519 $KEY_DIR/fw.key
 ############################################################
 # 1. generate rsa2048 key to sign vbmeta image
 openssl genrsa -out $KEY_DIR/vbmeta.priv.key 2048
-python2.7 $SCRIPT_PATH/avbtool extract_public_key --key $KEY_DIR/vbmeta.priv.key --output $KEY_DIR/vbmeta.pub.key
+python3 $SCRIPT_PATH/avbtool extract_public_key --key $KEY_DIR/vbmeta.priv.key --output $KEY_DIR/vbmeta.pub.key
 
 # 2. get public key's sha256
 sha256sum -b $KEY_DIR/vbmeta.pub.key > $KEY_DIR/vbmeta.pub.sha256
@@ -56,31 +56,95 @@ ROOT_KEY=$(sed -n '2,5p' $KEY_DIR/root.key)
 FW_KEY=$(sed -n '2,5p' $KEY_DIR/fw.key)
 VBMETA_KEY=$(sed -n '2,5p' $KEY_DIR/vbmeta.key)
 
-echo "{" > $KEY_DIR/key.json
+echo "{" >  $KEY_DIR/manifest.json
 
-echo '    "boot":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$ROOT_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo '  "MANIFEST_VER": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
 
-echo '    "cert":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$ROOT_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo '  "boot":' >> $KEY_DIR/manifest.json
+echo "  {" >> $KEY_DIR/manifest.json
+echo '    "IMG_ID": "0",' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MAJOR": 1,' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MINOR": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
 
-echo '    "app":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$FW_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo '    "SEC_EPOCH": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
 
-echo '    "vbmeta":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$VBMETA_KEY" >> $KEY_DIR/key.json
-echo "    }" >> $KEY_DIR/key.json
-echo "}" >> $KEY_DIR/key.json
+echo '    "HASH_ALG": "sha256",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "RSIP_IV": "0102030405060708",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo        "$ROOT_KEY" >> $KEY_DIR/manifest.json
+echo "  }," >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "//": "cert/app share IMG_ID/IMG_VER, rdp img is in app",' >> $KEY_DIR/manifest.json
+echo '  "app":' >> $KEY_DIR/manifest.json
+echo "  {" >> $KEY_DIR/manifest.json
+echo '    "IMG_ID": "1",' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MAJOR": 1,' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MINOR": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "SEC_EPOCH": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "HASH_ALG": "sha256",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "RSIP_IV": "213253647586a7b8",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo        "$FW_KEY" >> $KEY_DIR/manifest.json
+echo "  }," >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "vbmeta":' >> $KEY_DIR/manifest.json
+echo "  {" >> $KEY_DIR/manifest.json
+echo '    "IMG_ID": "2",' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MAJOR": 1,' >> $KEY_DIR/manifest.json
+echo '    "IMG_VER_MINOR": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "SEC_EPOCH": 1,' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "HASH_ALG": "sha256",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '    "RSIP_IV": "213253647586a7b8",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo        "$VBMETA_KEY" >> $KEY_DIR/manifest.json
+echo "  }," >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "cert":' >> $KEY_DIR/manifest.json
+echo "  {" >> $KEY_DIR/manifest.json
+echo        "$ROOT_KEY" >> $KEY_DIR/manifest.json
+echo "  }," >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "SECURE_BOOT_EN": 1,' >> $KEY_DIR/manifest.json
+echo '  "//": "HASH_ALG: sha256/sha384/sha512/hmac256/hmac384/hmac512, hamc need key",' >> $KEY_DIR/manifest.json
+echo '  "HMAC_KEY": "9874918301909234686574856692873911223344556677889900aabbccddeeff",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "RSIP_EN": 0,' >> $KEY_DIR/manifest.json
+echo '  "//": "RSIP_MODE: 1 is XTS(CTR+ECB), 0 is CTR",' >> $KEY_DIR/manifest.json
+echo '  "RSIP_MODE": 1,' >> $KEY_DIR/manifest.json
+echo '  "CTR_KEY": "6AA34203018334474B25A0600996CA0968AA6228B886FF234B4EB9628B703C0A",' >> $KEY_DIR/manifest.json
+echo '  "ECB_KEY": "E2A0D6500BBF1DD8DC212098C230EB731ECE3A81AA11D0E6E538FA36BBA4FF6E",' >> $KEY_DIR/manifest.json
+echo -e "" >> $KEY_DIR/manifest.json
+
+echo '  "//": "Actual RDP IV is 16Byte which is composed by app RSIP_IV[7:0] + RDP_IV[15:8]",' >> $KEY_DIR/manifest.json
+echo '  "RDP_EN": 0,' >> $KEY_DIR/manifest.json
+echo '  "RDP_IV": "0123456789abcdef",' >> $KEY_DIR/manifest.json
+echo '  "RDP_KEY": "11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff"' >> $KEY_DIR/manifest.json
+echo "}" >> $KEY_DIR/manifest.json
 
 echo -e "\n\n******* New key generated *******"
 echo "[root key]: $KEY_DIR/root.key"
@@ -88,4 +152,4 @@ echo "[fw key]: $KEY_DIR/fw.key"
 echo "[vbmeta key]: $KEY_DIR/vbmeta.key"
 echo "              $KEY_DIR/vbmeta.priv.key(private key)"
 echo "              $KEY_DIR/vbmeta.pub.key(public key)"
-echo "[keys json]: $KEY_DIR/key.json"
+echo "[manifest json]: $KEY_DIR/manifest.json"
