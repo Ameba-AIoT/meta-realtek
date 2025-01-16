@@ -13,6 +13,7 @@ SRC_URI += "file://0001-PATCH-otbr-agent.init.in-modify-lsb-related-function.pat
 		   file://0002-PATCH-otbr-web.init.in-modify-lsb-related-functions.patch \
 		   file://0003-PATCH-scripts-use-proper-cmd-service-in-yocto-platfo.patch \
 		   file://0004-PATCH-openthread-makefile-add-macro-for-testharness.patch \
+		   file://0005-PATCH-run-rtkcfu-before-otbr-agent-start.patch \
 		   file://init \
            "
 
@@ -64,6 +65,7 @@ EXTRA_OECMAKE = "-DBUILD_TESTING=OFF \
 				 -DOT_JAM_DETECTION=ON \
 				 -DOT_LINK_METRICS_INITIATOR=ON \
 				 -DOT_MLE_MAX_CHILDREN=64 \
+				 -DOTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyRTK2?uart-baudrate=2000000&uart-flow-control' \
                  "
 
 RDEPENDS:${PN} += "bash"

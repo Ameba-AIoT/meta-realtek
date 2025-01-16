@@ -235,7 +235,7 @@ index e6379838ae..c8355a9451 100644
      with BACKBONE_ROUTER || return 0
  
 -    sudo sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
-+    sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
++    sed -i.bak '/88\s\+openthread/d' /usr/lib/iproute2/rt_tables
 +
 +    if [ -f /etc/sysctl.conf ]; then
 +        sed -i '/^#/d' /etc/sysctl.conf
@@ -249,7 +249,7 @@ index e6379838ae..c8355a9451 100644
      rt_tables_uninstall
  
 -    sudo sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
-+    sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
++    sh -c 'echo "88 openthread" >>/usr/lib/iproute2/rt_tables'
  
      # Increase ancillary buffer size to allow for a larger number of multicast groups
      # Required for NdProxyManager::JoinSolicitedNodeMulticastGroup

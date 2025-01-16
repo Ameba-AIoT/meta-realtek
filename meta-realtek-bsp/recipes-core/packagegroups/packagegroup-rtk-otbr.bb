@@ -19,4 +19,5 @@ RDEPENDS:${PN} = "\
     coreutils \
     python3 \
     ot-br-posix \
+    rtkcfu \
 "

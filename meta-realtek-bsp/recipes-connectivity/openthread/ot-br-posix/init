@@ -16,6 +16,7 @@ case "$1" in
 		elif [ -e /usr/bin/otbr/script/setup ]; then
 			echo "$NAME setup config..."
 			./usr/bin/otbr/script/setup >/dev/null 2>&1
+			./usr/bin/otbr/script/server >/dev/null 2>&1
 		fi
 
 		;;
