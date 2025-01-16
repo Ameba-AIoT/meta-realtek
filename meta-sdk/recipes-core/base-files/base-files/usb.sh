@@ -1,6 +1,20 @@
+#!/bin/sh
+#
+# Copyright (C) 2024 Realtek
+#
 export PATH
+export status
 
+STATUS_FILE="status.txt"
 KERNEL_VERSION=`cat /proc/version | awk '{print $3}'`
+built_in="false"
+role=""
+
+if [ -e "$STATUS_FILE" ]; then
+    status=$(cat "$STATUS_FILE")
+else
+    status="init"
+fi
 
 function insmod_ko()
 {
@@ -15,67 +29,115 @@ function insmod_ko()
     fi
 }
 
+function rmmod_ko()
+{
+    if [ ! -e "$1" ]; then
+        echo "No such file: $1"
+        exit 1
+    fi
+    ko=`basename $1 .ko`
+    lsmod | grep ${ko//-/_} > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        rmmod $1
+    fi
+}
+
+function rmmod_class()
+{
+    if [ "$status" = "usbh_msc_ko" ]; then
+        rmmod_usbh_msc_ko
+    fi
+
+    if [ "$status" = "usbd_adb_ko" ]; then
+        rmmod_usbd_adb_ko
+    fi
+}
+
+function insmod_otg_ko()
+{
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+}
+
 function insmod_usbh_msc_ko()
 {
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+    status="usbh_msc_ko"
+    echo $status > $STATUS_FILE
 }
 
-function insmod_usbd_cdc_acm_ko()
+function rmmod_usbh_msc_ko()
+{
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    status="init"
+    echo $status > $STATUS_FILE
+}
+
+function insmod_usbd_adb_ko()
 {
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/u_serial.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_acm.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
-}
-
-function insmod_usbd_hid_ko()
-{
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+    status="usbd_adb_ko"
+    echo $status > $STATUS_FILE
 }
 
-function insmod_usbd_msc_ko()
+function rmmod_usbd_adb_ko()
 {
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_mass_storage.ko
-    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/fs/configfs/configfs.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/common/usb-common.ko 2>/dev/null
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/rtkdrivers/usb_phy/phy-rtk-usb.ko
+    status="init"
+    echo $status > $STATUS_FILE
+}
+
+function terminate_acc_release() {
+    PID=$(ps | grep /bin/adbd | grep -v grep | awk '{print $1}')
+    if [ -n "$PID" ]; then
+        kill -9 "$PID" > /dev/null 2>&1
+    fi
 }
 
 function mount_configfs()
 {
     if [ -e "/mnt/config/usb_gadget" ]; then
         umount -f /mnt/config > /dev/null 2>&1
-    	if [ $? -ne 0 ]; then
+        if [ $? -ne 0 ]; then
             echo "WARNING: Fail to re-mount USB configfs, following operations may result in failure"
             echo "If USB does not work, try:"
-	    echo "# umount -f /mnt/config"
-	    echo "# mount none /mnt/config/ -t configfs"
-	    echo "Or reboot and try again"
+        echo "# umount -f /mnt/config"
+        echo "# mount none /mnt/config/ -t configfs"
+        echo "Or reboot and try again"
             return 0
         fi
     else
@@ -83,7 +145,7 @@ function mount_configfs()
     fi
 
     mount none /mnt/config/ -t configfs
-    
+
     if [ ! -e "/mnt/config/usb_gadget" ]; then
         echo "Fail to mount USB configfs"
         return 1
@@ -92,102 +154,50 @@ function mount_configfs()
     return 0
 }
 
-function usbd_cdc_acm_init()
+function usbh_msc_init()
 {
-    echo "CDC ACM device init"
-
-    mount_configfs
-
-    cd /mnt/config/usb_gadget
-    mkdir cdc > /dev/null 2>&1
-    cd cdc
-
-    echo 0x0200 > bcdUSB
-    echo 0x02 > bDeviceClass
-    echo 0x02 > bDeviceSubClass
-    echo 64 > bMaxPacketSize0
-    echo 0x0BDA > idVendor
-    echo 0x8730 > idProduct
-
-    mkdir strings/0x409 > /dev/null 2>&1
-    echo "Realtek" > strings/0x409/manufacturer
-    echo "CDC ACM device" > strings/0x409/product
-    cat /proc/realtek/uuid > strings/0x409/serialnumber
-
-    mkdir configs/c.1 > /dev/null 2>&1
-    echo 120 > configs/c.1/MaxPower
-    mkdir configs/c.1/strings/0x409 > /dev/null 2>&1
-    echo "acm" > configs/c.1/strings/0x409/configuration
-
-    mkdir functions/acm.ttyS1 > /dev/null 2>&1
-    ln -sf functions/acm.ttyS1 configs/c.1/
+    #Force host mode
+    echo 1 > /sys/module/phy_rtk_usb/parameters/usb_force_mode
 }
 
-function usbd_hid_init()
+function usbd_acc_init()
 {
-    echo "HID device init"
+    local arg=${1:-0}
+    echo "ACC init"
 
     mount_configfs
 
     cd /mnt/config/usb_gadget
-    mkdir hid > /dev/null 2>&1
-    cd hid
-
+    mkdir acc > /dev/null 2>&1
+    cd acc
     echo 0x0200 > bcdUSB
-    echo 0x03 > bDeviceClass
-    echo 0x00 > bDeviceSubClass
+
+    echo 64 > bMaxPacketSize0
+
+    #adb will filter devices according to bDeviceClass, bDeviceSubClass and bDeviceProtocol
+    echo 0xff > bDeviceClass
+    echo 0x42 > bDeviceSubClass
     echo 0x01 > bDeviceProtocol
-    echo 64 > bMaxPacketSize0
+
     echo 0x0BDA > idVendor
     echo 0x8730 > idProduct
 
     mkdir strings/0x409 > /dev/null 2>&1
     echo "Realtek" > strings/0x409/manufacturer
-    echo "HID" > strings/0x409/product
+    echo "ADB Interface" > strings/0x409/product
     cat /proc/realtek/uuid > strings/0x409/serialnumber
 
     mkdir configs/c.1 > /dev/null 2>&1
     echo 120 > configs/c.1/MaxPower
     mkdir configs/c.1/strings/0x409 > /dev/null 2>&1
-    echo "hid" > configs/c.1/strings/0x409/configuration
+    echo "accessary" > configs/c.1/strings/0x409/configuration
 
-    mkdir functions/hid.usb0 > /dev/null 2>&1
-    echo 1 > functions/hid.usb0/subclass
-    echo 1 > functions/hid.usb0/protocol
-    echo 8 > functions/hid.usb0/report_length
-    echo -ne \\x05\\x01\\x09\\x06\\xa1\\x01\\x05\\x07\\x19\\xe0\\x29\\xe7\\x15\\x00\\x25\\x01\\x75\\x01\\x95\\x08\\x81\\x02\\x95\\x01\\x75\\x08\\x81\\x03\\x95\\x05\\x75\\x01\\x05\\x08\\x19\\x01\\x29\\x05\\x91\\x02\\x95\\x01\\x75\\x03\\x91\\x03\\x95\\x06\\x75\\x08\\x15\\x00\\x25\\x65\\x05\\x07\\x19\\x00\\x29\\x65\\x81\\x00\\xc0 > functions/hid.usb0/report_desc
-    ln -sf functions/hid.usb0 configs/c.1/
-}
-
-function usbd_msc_init()
-{
-    echo "MSC device init"
-
-    mount_configfs
-
-    cd /mnt/config/usb_gadget
-    mkdir msc > /dev/null 2>&1
-    cd msc
-
-    echo 0x0200 > bcdUSB
-    echo 0x0BDA > idVendor
-    echo 0x8730 > idProduct
-
-    mkdir strings/0x409 > /dev/null 2>&1
-    echo "Realtek" > strings/0x409/manufacturer
-    echo "MSC device" > strings/0x409/product
-    cat /proc/realtek/uuid > strings/0x409/serialnumber
-
-    mkdir configs/c.1 > /dev/null 2>&1
-    echo 120 > configs/c.1/MaxPower
-    mkdir configs/c.1/strings/0x409 > /dev/null 2>&1
-    echo "msc" > configs/c.1/strings/0x409/configuration
-
-    mkdir functions/mass_storage.0 > /dev/null 2>&1
-    echo /dev/mmcblk0 >functions/mass_storage.0/lun.0/file
-    echo 1 > functions/mass_storage.0/lun.0/removable
-    echo 0 > functions/mass_storage.0/lun.0/nofua
-    ln -sf functions/mass_storage.0 configs/c.1/
+    mkdir functions/accessory.adb > /dev/null 2>&1
+    ln -sf functions/accessory.adb configs/c.1/
+    #Force device mode in adb
+    if [ "$arg" -eq 2 ]; then
+       echo "$arg" > /sys/module/phy_rtk_usb/parameters/usb_force_mode
+    fi
 }
 
 function active_device()
@@ -206,40 +216,69 @@ function deactive_device()
 
 function usb_usage()
 {
-    echo "Usage: $0 <mode>"
-    echo "Where mode:"
-    echo "    usbh_msc - MSC host"
-    echo "    usbd_acm - CDC ACM device"
-    echo "    usbd_hid - HID device"
-    echo "    usbd_msc - MSC device"
+    echo "Usage: $0 [-b] [-r <role>]"
+    echo
+    echo "Description:"
+    echo "  -b,                  Optional: Use built-in mode."
+    echo "  -r <role>,           Mandatory: Specify the role to execute."
+    echo
+    echo "Where role:"
+    echo "  otg                  OTG mode"
+    echo "  usbh_msc             MSC host"
+    echo "  usbd_adb             ADB device"
+    echo
+    echo "Example:"
+    echo "  $0 -b -r otg"
+    echo "  $0 -r usbd_adb"
+    exit 1
 }
 
-if [ $# -lt 1 ]; then
-    usb_usage
-    exit 1
-fi
+while getopts 'br:h' OPT; do
+    case $OPT in
+        b)
+            built_in=true
+            ;;
+        r)
+            role="$OPTARG"
+            ;;
+        h)
+            usb_usage
+            ;;
+        ?)
+            usb_usage
+            ;;
+    esac
+done
 
-case $1 in
+case "$role" in
+    "otg")
+        if [ "$built_in" != "true" ]; then
+            insmod_otg_ko
+        fi
+        deactive_device
+        usbd_acc_init
+        active_device
+        /bin/adbd &
+        ;;
     "usbh_msc")
-        insmod_usbh_msc_ko
-        ;;
-    "usbd_acm")
-        insmod_usbd_cdc_acm_ko
+        terminate_acc_release
+        if [ "$built_in" != "true" ]; then
+            rmmod_class
+            insmod_usbh_msc_ko
+        fi
         deactive_device
-        usbd_cdc_acm_init
-        active_device
+        usbh_msc_init
         ;;
-    "usbd_hid")
-        insmod_usbd_hid_ko
+    "usbd_adb")
+        terminate_acc_release
+        if [ "$built_in" != "true" ]; then
+            rmmod_class
+            insmod_usbd_adb_ko
+        fi
         deactive_device
-        usbd_hid_init
+        usbd_acc_init 2
         active_device
-        ;;
-    "usbd_msc")
-        insmod_usbd_msc_ko
-        deactive_device
-        usbd_msc_init
-        active_device
+        /bin/adbd &
         ;;
     *)
         usb_usage
