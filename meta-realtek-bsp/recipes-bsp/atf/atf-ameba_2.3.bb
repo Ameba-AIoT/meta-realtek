@@ -17,7 +17,7 @@ export CROSS_COMPILE="${TARGET_PREFIX}"
 EXTERNALSRC = "${RTKDIR}/boot/arm-trusted-firmware"
 
 EXTRA_OEMAKE += "V=1"
-EXTRA_OEMAKE += "PLAT=amebasmart ARCH=aarch32 ARM_ARCH_MAJOR=8 AARCH32_SP=optee NEED_BL32=yes"
+EXTRA_OEMAKE += "PLAT=amebasmart ARCH=aarch32 ARM_ARCH_MAJOR=8 AARCH32_SP=optee NEED_BL32=yes DEBUG=1 BUILD_BASE=${B}/build"
 EXTRA_OEMAKE += " \
     BL32=${DEPLOY_DIR_IMAGE}/optee/tee-header_v2.bin \
     BL32_EXTRA1=${DEPLOY_DIR_IMAGE}/optee/tee-pager_v2.bin \
