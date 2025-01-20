@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 "
 
 IMAGE_INSTALL += " \
+    adbd \
     tinyalsa \
     alsa-lib \
     rtlbtmp \
