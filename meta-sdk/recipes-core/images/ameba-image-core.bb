@@ -20,6 +20,8 @@ IMAGE_INSTALL += " \
     adbd \
     tinyalsa \
     alsa-lib \
+    hciattach \
+    bluez5 \
     rtlbtmp \
     udev-extraconf \
     rtk-rc-local \
