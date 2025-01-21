@@ -26,6 +26,7 @@ RDEPENDS:${PN} = "\
     rtk-app-spic-test \
     rtk-app-thermal-test \
     rtk-app-uart-test \
+    rtk-app-usb-test \
     rtk-app-usbh-cdc-acm-test \
     rtk-app-usbh-uvc-test \
     rtk-app-usbh-vendor-test \
