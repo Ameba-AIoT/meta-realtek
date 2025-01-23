@@ -1,0 +1,13 @@
+diff --git a/tensorflow/lite/kernels/internal/optimized/neon_tensor_utils.cc b/tensorflow/lite/kernels/internal/optimized/neon_tensor_utils.cc
+index ca608a0931f..d9d5acaa85e 100644
+--- a/tensorflow/lite/kernels/internal/optimized/neon_tensor_utils.cc
++++ b/tensorflow/lite/kernels/internal/optimized/neon_tensor_utils.cc
+@@ -2331,7 +2331,7 @@ void NeonVectorScalarMultiply(const int8_t* vector, const int v_size,
+ // TODO(b/185850916): Consider changing the rounding stragey from "ties to away"
+ // to "ties to even" since vcvtnq_s32_f32 is generally more available.
+ inline int32x4_t RoundToNearest(const float32x4_t input) {
+-#if __ARM_ARCH >= 8
++#if __ARM_ARCH >= 9
+   return vcvtaq_s32_f32(input);
+ #else
+   static const float32x4_t zero_val_dup = vdupq_n_f32(0.0f);
