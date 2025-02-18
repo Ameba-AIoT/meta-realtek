@@ -32,6 +32,33 @@ do_install() {
     install -m 644 ${S}/bazel-bin/tensorflow/lite/libtensorflowlite.so \
         ${D}${libdir}
 
+    # install tensorflow headers
+    install -d ${D}${includedir}/tensorflow/lite
+    install -d ${D}${includedir}/tensorflow/lite/internal
+    install -d ${D}${includedir}/tensorflow/lite/c
+    install -d ${D}${includedir}/tensorflow/lite/profiling
+    install -d ${D}${includedir}/tensorflow/lite/kernels
+    install -d ${D}${includedir}/tensorflow/lite/schema
+    install -d ${D}${includedir}/tensorflow/lite/core
+    install -d ${D}${includedir}/tensorflow/lite/core/api
+    install -d ${D}${includedir}/tensorflow/lite/experimental/resource
+
+    install -m 755 ${S}/tensorflow/lite/*.h ${D}${includedir}/tensorflow/lite
+    install -m 755 ${S}/tensorflow/lite/internal/*.h ${D}${includedir}/tensorflow/lite/internal
+    install -m 755 ${S}/tensorflow/lite/c/*.h ${D}${includedir}/tensorflow/lite/c
+    install -m 755 ${S}/tensorflow/lite/profiling/*.h ${D}${includedir}/tensorflow/lite/profiling
+    install -m 755 ${S}/tensorflow/lite/kernels/*.h ${D}${includedir}/tensorflow/lite/kernels
+    install -m 755 ${S}/tensorflow/lite/schema/*.h ${D}${includedir}/tensorflow/lite/schema
+    install -m 755 ${S}/tensorflow/lite/core/*.h ${D}${includedir}/tensorflow/lite/core
+    install -m 755 ${S}/tensorflow/lite/core/api/*.h ${D}${includedir}/tensorflow/lite/core/api
+    install -m 755 ${S}/tensorflow/lite/experimental/resource/*.h ${D}${includedir}/tensorflow/lite/experimental/resource
+
+    # install flatbuffers headers
+    install -d ${D}${includedir}/flatbuffers
+    install -d ${D}${includedir}/flatbuffers/pch
+    install -m 755 ${S}/../bazel/output_base/external/flatbuffers/include/flatbuffers/*.h ${D}${includedir}/flatbuffers
+    install -m 755 ${S}/../bazel/output_base/external/flatbuffers/include/flatbuffers/pch/*.h ${D}${includedir}/flatbuffers/pch
+
     install -d ${D}${sbindir}
     install -m 755 ${S}/bazel-bin/tensorflow/lite/tools/benchmark/benchmark_model \
         ${D}${sbindir}
