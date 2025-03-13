@@ -8,8 +8,9 @@
 
 function touch_para()
 {
-    rm -f ${PARA_FILEDIR}/${PARA_FILENAME}
-    touch ${PARA_FILEDIR}/${PARA_FILENAME}
+    cd ${GCCPROJECT_DIR} && ./menuconfig.py -r && cd -
+    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    touch ${GCCPROJECT_DIR}/${PARA_FILENAME}
 }
 
 function bak_config()
@@ -30,16 +31,16 @@ function bak_config()
         cp -f ${CONFIG_DIR}/.config_ca32 ${CONFIG_DIR}/.config_ca32.bak; \
     fi
 
-    if [ ! -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
-        cp -f ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak; \
+    if [ ! -e ${CONFIG_DIR}/project_lp/platform_autoconf.h.bak ]; then \
+        cp -f ${CONFIG_DIR}/project_lp/platform_autoconf.h ${CONFIG_DIR}/project_lp/platform_autoconf.h.bak; \
     fi
 
-    if [ ! -e ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ]; then \
-        cp -f ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak; \
+    if [ ! -e ${CONFIG_DIR}/project_hp/platform_autoconf.h.bak ]; then \
+        cp -f ${CONFIG_DIR}/project_hp/platform_autoconf.h ${CONFIG_DIR}/project_hp/platform_autoconf.h.bak; \
     fi
 
-    if [ ! -e ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ]; then \
-        cp -f ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak; \
+    if [ ! -e ${CONFIG_DIR}/project_ap/platform_autoconf.h.bak ]; then \
+        cp -f ${CONFIG_DIR}/project_ap/platform_autoconf.h ${CONFIG_DIR}/project_ap/platform_autoconf.h.bak; \
     fi
 }
 
@@ -48,7 +49,7 @@ function enable_linux_config()
 {
     echo "Enable linux config"
 
-    echo "LINUX_FW_EN=y" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    echo "LINUX_FW_EN=y" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     cd ${GCCPROJECT_DIR}
     ./menuconfig.py -f ${PARA_FILENAME}
     cd -
@@ -58,7 +59,7 @@ function enable_mp_config
 {
     echo "Enable firmware MP config"
 
-    echo "MP_INCLUDED=y" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    echo "MP_INCLUDED=y" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     cd ${GCCPROJECT_DIR}
     ./menuconfig.py -f ${PARA_FILENAME}
     cd -
@@ -68,7 +69,7 @@ function disable_mp_config
 {
     echo "Disable firmware MP config"
 
-    echo "MP_INCLUDED=n" >> ${PARA_FILEDIR}/${PARA_FILENAME}
+    echo "MP_INCLUDED=n" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     cd ${GCCPROJECT_DIR}
     ./menuconfig.py -f ${PARA_FILENAME}
     cd -
@@ -93,23 +94,23 @@ function reset_config
         mv -f ${CONFIG_DIR}/.config_ca32.bak ${CONFIG_DIR}/.config_ca32; \
     fi
 
-    if [ -e ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ]; then \
-        mv -f ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h.bak ${GCCPROJECT_DIR}/project_lp/inc/platform_autoconf.h; \
+    if [ -e ${CONFIG_DIR}/project_lp/platform_autoconf.h.bak ]; then \
+        mv -f ${CONFIG_DIR}/project_lp/platform_autoconf.h.bak ${CONFIG_DIR}/project_lp/platform_autoconf.h; \
     fi
 
-    if [ -e ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ]; then \
-        mv -f ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h.bak ${GCCPROJECT_DIR}/project_hp/inc/platform_autoconf.h; \
+    if [ -e ${CONFIG_DIR}/project_hp/platform_autoconf.h.bak ]; then \
+        mv -f ${CONFIG_DIR}/project_hp/platform_autoconf.h.bak ${CONFIG_DIR}/project_hp/platform_autoconf.h; \
     fi
 
-    if [ -e ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ]; then \
-        mv -f ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h.bak ${GCCPROJECT_DIR}/project_ap/inc/platform_autoconf.h; \
+    if [ -e ${CONFIG_DIR}/project_ap/platform_autoconf.h.bak ]; then \
+        mv -f ${CONFIG_DIR}/project_ap/platform_autoconf.h.bak ${CONFIG_DIR}/project_ap/platform_autoconf.h; \
     fi
 }
 
 function build_firmware
 {
-    bak_config
     touch_para
+    bak_config
     enable_linux_config
     disable_mp_config
 
@@ -120,8 +121,8 @@ function build_firmware
 
 function build_mp_firmware
 {
-    bak_config
     touch_para
+    bak_config
     enable_linux_config
     enable_mp_config
 
@@ -132,6 +133,7 @@ function build_mp_firmware
 
 function make_firmware_menuconfig
 {
+    touch_para
     bak_config
     cd ${GCCPROJECT_DIR}
     ./menuconfig.py
@@ -185,7 +187,6 @@ fi
 
 GCCPROJECT_DIR=${FW_SRC_DIR}/amebasmart_gcc_project
 CONFIG_DIR=${GCCPROJECT_DIR}/menuconfig
-PARA_FILEDIR=${CONFIG_DIR}/confs_daily_build
 PARA_FILENAME=linux_para.conf
 
 if [ "$BUILD_TARGET" = "wifi" ]; then

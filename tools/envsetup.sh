@@ -163,7 +163,7 @@ function croot()
 function clinux()
 {
     if [ "$ROOTDIR" ]; then
-        \cd ${ROOTDIR}/sources/kernel/linux-5.4
+        \cd ${ROOTDIR}/sources/kernel/linux-6.6
     else
         echo "Couldn't locate the top of the tree."
     fi
