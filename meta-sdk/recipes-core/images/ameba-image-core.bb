@@ -17,6 +17,7 @@ IMAGE_INSTALL += " \
 "
 
 IMAGE_INSTALL += " \
+    recoveryd \
     adbd \
     tinyalsa \
     alsa-lib \
