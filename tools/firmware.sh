@@ -39,29 +39,60 @@ function bak_config()
     fi
 }
 
-
 function enable_linux_config()
 {
     echo "Enable linux config"
 
+    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if [ -f ${CONFIG_DIR}/.config ]; then
+        cd ${GCCPROJECT_DIR}
+        ./menuconfig.py -s ${GCCPROJECT_DIR}/${PARA_FILENAME}
+        cd -
+    fi
+
     local LINUX_FW_EN_STRING="CONFIG_LINUX_FW_EN=y"
+    local MP_NOT_INCLUDE_STRING="CONFIG_MP_INCLUDED=n"
     if ! grep -q "$LINUX_FW_EN_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
         echo "$LINUX_FW_EN_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     fi
+    if ! grep -q "$MP_NOT_INCLUDE_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
+        echo "$MP_NOT_INCLUDE_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    fi
+
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    cd -
 }
 
-function enable_mp_expand_config
+function enable_linux_mp_config
 {
-    echo "Enable mp expand config"
+    echo "Enable linux mp config"
 
+    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if [ -f ${CONFIG_DIR}/.config ]; then
+        cd ${GCCPROJECT_DIR}
+        ./menuconfig.py -s ${GCCPROJECT_DIR}/${PARA_FILENAME}
+        cd -
+    fi
+
+    local LINUX_FW_EN_STRING="CONFIG_LINUX_FW_EN=y"
     local MP_INCLUDE_STRING="CONFIG_MP_INCLUDED=y"
     local MP_EXPAND_STRING="CONFIG_MP_EXPAND=y"
+    if ! grep -q "$LINUX_FW_EN_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
+        echo "$LINUX_FW_EN_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    fi
     if ! grep -q "$MP_INCLUDE_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
         echo "$MP_INCLUDE_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     fi
     if ! grep -q "$MP_EXPAND_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
         echo "$MP_EXPAND_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
     fi
+
+    cd ${GCCPROJECT_DIR}
+    ./menuconfig.py -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    cd -
 }
 
 function reset_config
@@ -102,7 +133,16 @@ function build_firmware
 {
     bak_config
     enable_linux_config
-    enable_mp_expand_config
+
+    cd ${GCCPROJECT_DIR}
+    ./build.py
+    cd -
+}
+
+function build_mp_firmware
+{
+    bak_config
+    enable_linux_mp_config
 
     cd ${GCCPROJECT_DIR}
     ./build.py
@@ -164,10 +204,13 @@ fi
 
 GCCPROJECT_DIR=${FW_SRC_DIR}/amebasmart_gcc_project
 CONFIG_DIR=${GCCPROJECT_DIR}/menuconfig
-PARA_FILENAME=default.conf
+PARA_FILENAME=linux_para.conf
 
 if [ "$BUILD_TARGET" = "wifi" ]; then
     build_firmware
+
+elif [ "$BUILD_TARGET" = "mp" ]; then
+    build_mp_firmware
 
 elif [ "$BUILD_TARGET" = "menuconfig" ]; then
     make_firmware_menuconfig

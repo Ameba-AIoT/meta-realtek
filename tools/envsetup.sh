@@ -286,6 +286,7 @@ function mfw()
 
     local fw_build=${ROOTDIR}/sources/yocto/meta-realtek/tools/firmware.sh
     local fw_source=${ROOTDIR}/sources/firmware
+    local fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image
     local mp_fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image_mp
     local loader_bin_dir=$fw_source/amebasmart_gcc_project/project_hp/asdk/gnu_utility/image_tool_flashloader/amebasmart_acut
     local deploy_dir=${BUILDDIR}/tmp/deploy/images/${TARGET_MACHINE}
@@ -316,8 +317,11 @@ function mfw()
     fi
 
     if [ -z "$1" ]; then
-        cp -f $mp_fw_image/km4_boot_all.bin ${deploy_dir}/km4_boot_all.bin
-        cp -f $mp_fw_image/km0_km4_app_mp.bin ${deploy_dir}/km0_km4_app.bin
+        cp -f $fw_image/km4_boot_all.bin ${deploy_dir}/km4_boot_all.bin
+        cp -f $fw_image/km0_km4_app.bin ${deploy_dir}/km0_km4_app.bin
+    elif [ "$1" = "mp" ]; then
+        cp -f $mp_fw_image/km4_boot_all.bin ${deploy_dir}/km4_boot_all_mp.bin
+        cp -f $mp_fw_image/km0_km4_app_mp.bin ${deploy_dir}/km0_km4_app_mp.bin
     fi
     if [ -f $loader_bin_dir/imgtool_flashloader.bin ]; then
         cp -f $loader_bin_dir/imgtool_flashloader.bin ${deploy_dir}
