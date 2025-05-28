@@ -30,6 +30,7 @@ IMAGE_INSTALL += " \
     lvgl \
     lv-drivers \
     ${@bb.utils.contains('DISTRO_FEATURES', 'rtk-fwk-full', 'packagegroup-rtk-test rtk-gui', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'matter', 'packagegroup-matter-examples', '', d)} \
 "
 
 IMAGE_INSTALL:remove:rtl8730eah-va6 = " \
