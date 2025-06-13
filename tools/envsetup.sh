@@ -323,8 +323,8 @@ function mfw()
         cp -f $mp_fw_image/km4_boot_all.bin ${deploy_dir}/km4_boot_all_mp.bin
         cp -f $mp_fw_image/km0_km4_app_mp.bin ${deploy_dir}/km0_km4_app_mp.bin
     fi
-    if [ -f $loader_bin_dir/imgtool_flashloader.bin ]; then
-        cp -f $loader_bin_dir/imgtool_flashloader.bin ${deploy_dir}
+    if [ -f $loader_bin_dir/floader_amebasmart.bin ]; then
+        cp -f $loader_bin_dir/floader_amebasmart.bin ${deploy_dir}/imgtool_flashloader.bin
     fi
 }
 
