@@ -3,6 +3,7 @@ From: ZivLowRTK <zivlow@realtek-sg.com>
 Date: Tue, 27 Aug 2024 18:31:10 +0000
 Subject: [PATCH] enable experimental and disable battery plugin
 
+Upstream-Status: Pending
 ---
  init | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
