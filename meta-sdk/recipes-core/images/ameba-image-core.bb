@@ -20,6 +20,7 @@ IMAGE_INSTALL += " \
     recoveryd \
     adbd \
     alsa-lib \
+    alsa-utils \
     hciattach \
     bluez5 \
     rtlbtmp \
