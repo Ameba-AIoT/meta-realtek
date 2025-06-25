@@ -17,6 +17,8 @@ IMAGE_INSTALL += " \
 "
 
 IMAGE_INSTALL += " \
+    rng-tools \
+    rng-tools-service \
     recoveryd \
     adbd \
     alsa-lib \
