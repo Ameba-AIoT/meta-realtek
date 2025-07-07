@@ -19,6 +19,8 @@ IMAGE_INSTALL += " \
 IMAGE_INSTALL += " \
     rng-tools \
     rng-tools-service \
+    libubootenv \
+    libubootenv-bin \
     recoveryd \
     adbd \
     alsa-lib \

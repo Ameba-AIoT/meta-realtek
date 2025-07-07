@@ -1,0 +1,78 @@
+software =
+{
+    version = "2.2";
+    hardware-compatibility: [ "v2.2"];
+    images: (
+        {
+            filename = "km4_boot_all.bin";
+            version = "2";
+            device = "/dev/mtd6";
+            sha256 = "@km4_boot_all.bin";
+        },
+        {
+            filename = "km0_km4_app.bin";
+            version = "2";
+            device = "/dev/mtd7";
+            sha256 = "@km0_km4_app.bin";
+        },
+        {
+            filename = "boot.img";
+            version = "2";
+            device = "/dev/mtd8";
+            sha256 = "@boot.img";
+        },
+        {
+            filename = "km4_boot_all.bin";
+            version = "2";
+            device = "/dev/mtd9";
+            sha256 = "@km4_boot_all.bin";
+        },
+        {
+            filename = "km0_km4_app.bin";
+            version = "2";
+            device = "/dev/mtd10";
+            sha256 = "@km0_km4_app.bin";
+        },
+        {
+            filename = "boot.img";
+            version = "2";
+            device = "/dev/mtd11";
+            sha256 = "@boot.img";
+        },
+        {
+            filename = "dtb.img";
+            version = "2";
+            device = "/dev/mtd2";
+            sha256 = "@dtb.img";
+        },
+        {
+            filename = "kernel.img";
+            version = "2";
+            device = "/dev/mtd3";
+            sha256 = "@kernel.img";
+        },
+        {
+            filename = "rootfs.img";
+            version = "2";
+            device = "/dev/mtd4";
+            sha256 = "@rootfs.img";
+        },
+    );
+
+    scripts: (
+        {
+            filename = "pre_install.sh";
+            type = "preinstall";
+            sha256 = "@pre_install.sh";
+        },
+        {
+            filename = "post_install.sh";
+            type = "postinstall";
+            sha256 = "@post_install.sh";
+        }
+    );
+
+    signature: {
+        cms = "sw-description.sig";
+    };
+}

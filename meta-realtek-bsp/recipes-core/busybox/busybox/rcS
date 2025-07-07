@@ -18,8 +18,18 @@ else
     mount -t jffs2 /dev/mtdblock5 /rom/mnt
 fi
 
-cat /etc/motd
+mkdir -p /var/run
 
-if [ -e /bin/recovery ]; then
+cat /etc/motd
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+
+update_mode=$(/usr/bin/fw_printenv -n update_mode)
+
+if [ "x$update_mode" = "xnormal" ] &&  [ -e /bin/recovery ]; then
     recovery > /dev/ttyS0
+elif [ -e /bin/recovery.sh ]; then
+    ./bin/recovery.sh > /dev/ttyS0
 fi
+
+reboot
+

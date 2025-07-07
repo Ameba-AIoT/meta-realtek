@@ -1,0 +1,2 @@
+SWUPDATE_ARGS="-D -o /rom/mnt/linux_yocto.swu -f /etc/swupdate.cfg"
+SWUPDATE_SURICATTA_ARGS="-t default -u http://192.168.137.151:8080 -i smart_va8"
