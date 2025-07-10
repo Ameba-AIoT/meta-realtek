@@ -1,34 +1,25 @@
-From 7da49f094063cf602701a69a1d20eb077f812d86 Mon Sep 17 00:00:00 2001
+From ff37116ed3fdd0d16623060dbc7547e9bac36b09 Mon Sep 17 00:00:00 2001
 From: xuebin_wu <xuebin_wu@realsil.com.cn>
-Date: Mon, 16 Dec 2024 12:52:14 +0800
+Date: Thu, 10 Jul 2025 14:00:24 +0800
 Subject: [PATCH] run rtkcfu before otbr agent start
 
 ---
- script/server | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ script/server | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/script/server b/script/server
-index 91917033554..83041a45a19 100755
+index 4073936d421..8429f382530 100755
 --- a/script/server
 +++ b/script/server
-@@ -52,7 +52,7 @@ startup()
-         systemctl is-active dbus-1 || sudo systemctl start dbus-1 || die 'Failed to start dbus-1!'
-         systemctl is-active avahi-daemon || sudo systemctl start avahi-daemon || die 'Failed to start avahi!'
-         without WEB_GUI || systemctl is-active otbr-web || sudo systemctl start otbr-web || die 'Failed to start otbr-web!'
--        systemctl is-active otbr-agent || sudo systemctl start otbr-agent || die 'Failed to start otbr-agent!'
-+        sudo systemctl stop otbr-agent && sudo rtkcfu update /lib/firmware/rtkcfu/8771HTV/config.txt /lib/firmware/rtkcfu/8771HTV/ /lib/firmware/rtkcfu/8771HTV/ || sudo systemctl start otbr-agent || die 'Failed to start otbr-agent!'
-     elif have service; then
-         test -e $SYSLOG_FOLDER || mkdir $SYSLOG_FOLDER
-         sudo service syslog status || sudo service syslog start || die 'Failed to start syslog!'
-@@ -61,7 +61,7 @@ startup()
+@@ -63,6 +63,8 @@ startup()
          sudo service mdns status || sudo service mdns start || echo "service mdns is not available!"
-         test -e $AVAHI_DAEMON_PID_FILDER && rm -rf $AVAHI_DAEMON_PID_FILDER
-         sudo service avahi-daemon status || sudo service avahi-daemon start || die 'Failed to start avahi!'
--        sudo service otbr-agent status || sudo service otbr-agent start || die 'Failed to start otbr-agent!'
-+        sudo service otbr-agent stop && sudo rtkcfu update /lib/firmware/rtkcfu/8771HTV/config.txt /lib/firmware/rtkcfu/8771HTV/ /lib/firmware/rtkcfu/8771HTV/ || sudo service otbr-agent start || die 'Failed to start otbr-agent!'
-         without WEB_GUI || sudo service otbr-web status || sudo service otbr-web start || die 'Failed to start otbr-web!'
-     else
-         die 'Unable to find service manager. Try script/console to start in console mode!'
+     fi
+     without WEB_GUI || start_service otbr-web
++    stop_service otbr-agent
++    sudo rtkcfu update /lib/firmware/rtkcfu/8771HTV/config.txt /lib/firmware/rtkcfu/8771HTV/ /lib/firmware/rtkcfu/8771HTV/ || true
+     start_service otbr-agent
+ 
+     # shellcheck source=/dev/null
 -- 
-2.25.1
+2.33.0.windows.1
 

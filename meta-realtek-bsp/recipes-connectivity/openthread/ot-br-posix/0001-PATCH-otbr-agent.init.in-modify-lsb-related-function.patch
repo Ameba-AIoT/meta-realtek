@@ -1,7 +1,7 @@
 From 080aa1b8632b8118edc7b0ca871af7156402bd71 Mon Sep 17 00:00:00 2001
 From: lisa_xu <lisa_xu@realsil.com.cn>
 Date: Thu, 14 Mar 2024 18:15:50 +0800
-Subject: [PATCH 1/4] [PATCH] otbr-agent.init.in modify lsb related functions
+Subject: [PATCH] otbr-agent.init.in modify lsb related functions
 
 lsb is not supported from yocto 3.0.
 verification:

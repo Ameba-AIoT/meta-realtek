@@ -1,7 +1,7 @@
 From 3777bbe26f70ce36d1aa906e268b4235e04d14b8 Mon Sep 17 00:00:00 2001
 From: lisa_xu <lisa_xu@realsil.com.cn>
 Date: Thu, 14 Mar 2024 18:17:06 +0800
-Subject: [PATCH 2/4] [PATCH] otbr-web.init.in modify lsb related functions
+Subject: [PATCH] otbr-web.init.in modify lsb related functions
 
 lsb is not supported from yocto 3.0.
 verification:

@@ -1,32 +1,28 @@
-From a2ad3331a11ded1c42ceecd7777afc74b7c049f5 Mon Sep 17 00:00:00 2001
-From: lisa_xu <lisa_xu@realsil.com.cn>
-Date: Tue, 23 Apr 2024 13:41:48 +0800
-Subject: [PATCH 4/4] [PATCH] openthread makefile: add macro for testharness
+From 63aaf4f302904f6b1c3d8eda9492325bf9574cfd Mon Sep 17 00:00:00 2001
+From: xuebin_wu <xuebin_wu@realsil.com.cn>
+Date: Thu, 10 Jul 2025 10:36:22 +0800
+Subject: [PATCH] openthread makefile: add macro for testharness
 
-verification:
-otbr testharness run ok.
 ---
- third_party/openthread/CMakeLists.txt | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
+ third_party/openthread/CMakeLists.txt | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/third_party/openthread/CMakeLists.txt b/third_party/openthread/CMakeLists.txt
-index 03ad863352..1886c776f7 100644
+index 8bb5a75d606..af7d7cd4b35 100644
 --- a/third_party/openthread/CMakeLists.txt
 +++ b/third_party/openthread/CMakeLists.txt
-@@ -66,7 +66,7 @@ set(OT_SERVICE ON CACHE STRING "enable service" FORCE)
- set(OT_SLAAC ON CACHE STRING "enable SLAAC" FORCE)
+@@ -70,7 +70,7 @@ set(OT_SLAAC ON CACHE STRING "enable SLAAC" FORCE)
  set(OT_SRP_CLIENT ON CACHE STRING "enable SRP client" FORCE)
+ set(OT_SRP_ADV_PROXY ${OTBR_OT_SRP_ADV_PROXY} CACHE STRING "enable SRP Advertising Proxy" FORCE)
  set(OT_TARGET_OPENWRT ${OTBR_OPENWRT} CACHE STRING "target on OpenWRT" FORCE)
--set(OT_TCP OFF CACHE STRING "disable TCP" FORCE)
-+set(OT_TCP ON CACHE STRING "enable TCP" FORCE)
+-set(OT_TCP OFF CACHE STRING "disable TCP")
++set(OT_TCP ON CACHE STRING "disable TCP")
  set(OT_TREL ${OTBR_TREL} CACHE STRING "enable TREL" FORCE)
  set(OT_UDP_FORWARD OFF CACHE STRING "disable udp forward" FORCE)
  set(OT_UPTIME ON CACHE STRING "enable uptime" FORCE)
-@@ -104,8 +104,19 @@ target_compile_definitions(ot-config INTERFACE
-     "-DOPENTHREAD_CONFIG_LOG_CLI=1"
+@@ -121,6 +121,18 @@ target_compile_definitions(ot-config INTERFACE
      "-DOPENTHREAD_CONFIG_MAX_STATECHANGE_HANDLERS=3"
      "-DOPENTHREAD_CONFIG_MLE_STEERING_DATA_SET_OOB_ENABLE=1"
--    "-DOPENTHREAD_CONFIG_TCP_ENABLE=0"
      "-DOPENTHREAD_POSIX_CONFIG_FILE=\"${PROJECT_BINARY_DIR}/src/agent/openthread-otbr-posix-config.h\""
 +    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_ACK_TIMEOUT_ENABLE=0"
 +    "-DOPENTHREAD_CONFIG_MAC_SOFTWARE_RETRANSMIT_ENABLE=1"
@@ -44,5 +40,5 @@ index 03ad863352..1886c776f7 100644
  
  if (NOT OT_THREAD_VERSION STREQUAL "1.1")
 -- 
-2.17.1
+2.33.0.windows.1
 

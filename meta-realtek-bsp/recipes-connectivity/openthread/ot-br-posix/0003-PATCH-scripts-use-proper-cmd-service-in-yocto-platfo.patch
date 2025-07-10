@@ -1,10 +1,8 @@
-From 84029ac39fcbaa2d1961380aa1a54368c9508139 Mon Sep 17 00:00:00 2001
-From: lisa_xu <lisa_xu@realsil.com.cn>
-Date: Tue, 16 Apr 2024 11:01:32 +0800
-Subject: [PATCH 3/4] [PATCH] scripts: use proper cmd&service in yocto platform
+From 279626f213a2045d8bedd98db503af135c36fb8a Mon Sep 17 00:00:00 2001
+From: xuebin_wu <xuebin_wu@realsil.com.cn>
+Date: Thu, 10 Jul 2025 11:45:29 +0800
+Subject: [PATCH] scripts: use proper cmd&service in yocto platform
 
-verification:
-otbr test run ok.
 ---
  script/_border_routing | 14 +++++++++++++-
  script/_firewall       |  4 ++++
@@ -13,15 +11,15 @@ otbr test run ok.
  script/_nat64          |  8 ++++++--
  script/_otbr           | 20 ++++++++++----------
  script/_rt_tables      | 17 +++++++++++------
- script/defaults        | 39 +++++++++++++++++++++++++++++++++++++++
+ script/defaults        | 38 ++++++++++++++++++++++++++++++++++++++
  script/otbr-firewall   |  4 ++--
- script/server          | 23 ++++++++++++++---------
- script/setup           |  6 +++---
- 11 files changed, 123 insertions(+), 38 deletions(-)
+ script/server          | 18 +++++++++++-------
+ script/setup           |  4 ++--
+ 11 files changed, 118 insertions(+), 35 deletions(-)
  create mode 100644 script/defaults
 
 diff --git a/script/_border_routing b/script/_border_routing
-index f17c8fe690..e82b7357a5 100644
+index e9b79c76932..647b15f6039 100644
 --- a/script/_border_routing
 +++ b/script/_border_routing
 @@ -33,6 +33,8 @@
@@ -61,10 +59,10 @@ index f17c8fe690..e82b7357a5 100644
  
  accept_ra_enable()
 diff --git a/script/_firewall b/script/_firewall
-index 0a29c3699c..67b21e9682 100755
+index 28344d24101..138b418b2bc 100755
 --- a/script/_firewall
 +++ b/script/_firewall
-@@ -60,6 +60,8 @@ firewall_start()
+@@ -68,6 +68,8 @@ firewall_start()
          service otbr-firewall start || die 'Failed to start firewall service'
      elif have systemctl; then
          sudo systemctl start otbr-firewall || die 'Failed to start firewall service'
@@ -73,7 +71,7 @@ index 0a29c3699c..67b21e9682 100755
      fi
  }
  
-@@ -69,5 +71,7 @@ firewall_stop()
+@@ -79,5 +81,7 @@ firewall_stop()
          service otbr-firewall stop || true
      elif have systemctl; then
          sudo systemctl stop otbr-firewall || true
@@ -82,7 +80,7 @@ index 0a29c3699c..67b21e9682 100755
      fi
  }
 diff --git a/script/_initrc b/script/_initrc
-index 2ff3c84973..fe1899e804 100644
+index c630852abfe..eda4156460e 100644
 --- a/script/_initrc
 +++ b/script/_initrc
 @@ -31,6 +31,11 @@ set -euxo pipefail
@@ -109,7 +107,7 @@ index 2ff3c84973..fe1899e804 100644
          fi
      fi
  
-@@ -120,8 +125,8 @@ BUILD_DIR=$PWD/build
+@@ -144,8 +149,8 @@ BUILD_DIR=$PWD/build
  export PATH=$STAGE_DIR/usr/bin:$STAGE_DIR/usr/sbin:$PATH
  
  TASKNAME=$(basename "$0")
@@ -121,7 +119,7 @@ index 2ff3c84973..fe1899e804 100644
      BEFORE_HOOK=/dev/null
  fi
 diff --git a/script/_ipforward b/script/_ipforward
-index 5bf8d2e35d..979aac96a0 100644
+index 5bf8d2e35d5..979aac96a06 100644
 --- a/script/_ipforward
 +++ b/script/_ipforward
 @@ -30,11 +30,17 @@
@@ -156,10 +154,10 @@ index 5bf8d2e35d..979aac96a0 100644
  
  ipforward_enable()
 diff --git a/script/_nat64 b/script/_nat64
-index 521c4d2216..7ba53d23d0 100644
+index 1355aff39d9..8a6159daed5 100644
 --- a/script/_nat64
 +++ b/script/_nat64
-@@ -144,8 +144,8 @@ nat44_install()
+@@ -82,8 +82,8 @@ nat44_install()
  #                    to connect to arbitrary IPv4 endpoints.
  ### END INIT INFO
  
@@ -170,7 +168,7 @@ index 521c4d2216..7ba53d23d0 100644
  
  case "\$1" in
      start)
-@@ -206,6 +206,8 @@ nat44_start()
+@@ -136,6 +136,8 @@ nat44_start()
          service otbr-nat44 start || die 'Failed to start NAT44!'
      elif have systemctl; then
          sudo systemctl start otbr-nat44 || die 'Failed to start NAT44!'
@@ -179,7 +177,7 @@ index 521c4d2216..7ba53d23d0 100644
      fi
  }
  
-@@ -215,6 +217,8 @@ nat44_stop()
+@@ -145,6 +147,8 @@ nat44_stop()
          service otbr-nat44 stop || true
      elif have systemctl; then
          sudo systemctl stop otbr-nat44 || true
@@ -189,7 +187,7 @@ index 521c4d2216..7ba53d23d0 100644
  }
  
 diff --git a/script/_otbr b/script/_otbr
-index 790ab10ae9..82f3d28ede 100644
+index ca7811d9865..a1b9f2fe251 100644
 --- a/script/_otbr
 +++ b/script/_otbr
 @@ -48,12 +48,12 @@ otbr_uninstall()
@@ -211,7 +209,7 @@ index 790ab10ae9..82f3d28ede 100644
      if have systemctl; then
          sudo systemctl daemon-reload
      fi
-@@ -128,10 +128,10 @@ otbr_install()
+@@ -153,10 +153,10 @@ otbr_install()
          )
      fi
  
@@ -227,7 +225,7 @@ index 790ab10ae9..82f3d28ede 100644
      if have systemctl; then
          sudo systemctl reload dbus
 diff --git a/script/_rt_tables b/script/_rt_tables
-index e6379838ae..c8355a9451 100644
+index e6379838aeb..fd9b8e004bc 100644
 --- a/script/_rt_tables
 +++ b/script/_rt_tables
 @@ -34,7 +34,12 @@ rt_tables_uninstall()
@@ -266,10 +264,10 @@ index e6379838ae..c8355a9451 100644
  }
 diff --git a/script/defaults b/script/defaults
 new file mode 100644
-index 0000000000..9d8f6312b5
+index 00000000000..9e6ddf62cd1
 --- /dev/null
 +++ b/script/defaults
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,38 @@
 +#!/bin/sh
 +#
 +#  Copyright (c) 2017-2021, The OpenThread Authors.
@@ -301,9 +299,8 @@ index 0000000000..9d8f6312b5
 +
 +# shellcheck disable=SC2034
 +NAT64=1
-+DNS64=0
 +DHCPV6_PD=0
-+NETWORK_MANAGER=0
++DHCPV6_PD_REF=0
 +BACKBONE_ROUTER=1
 +BORDER_ROUTING=1
 +WEB_GUI=0
@@ -311,7 +308,7 @@ index 0000000000..9d8f6312b5
 +FIREWALL=1
 \ No newline at end of file
 diff --git a/script/otbr-firewall b/script/otbr-firewall
-index 52cef42dd0..57631c8f68 100644
+index 52cef42dd0b..57631c8f683 100644
 --- a/script/otbr-firewall
 +++ b/script/otbr-firewall
 @@ -41,8 +41,8 @@
@@ -326,12 +323,12 @@ index 52cef42dd0..57631c8f68 100644
  set -euxo pipefail
  
 diff --git a/script/server b/script/server
-index b4eaedfb9a..8e1cddbe2f 100755
+index d8d80b6209a..4073936d421 100755
 --- a/script/server
 +++ b/script/server
-@@ -36,25 +36,30 @@
- . script/_dns64
- . script/_firewall
+@@ -39,20 +39,24 @@ OTBR_MDNS="${OTBR_MDNS:-mDNSResponder}"
+ OT_BACKBONE_CI="${OT_BACKBONE_CI:-0}"
+ REFERENCE_DEVICE="${REFERENCE_DEVICE:-0}"
  
 +SYSLOG_FOLDER="/var/volatile/log"
 +AVAHI_DAEMON_PID_FILDER="/var/run/avahi-daemon"
@@ -343,72 +340,56 @@ index b4eaedfb9a..8e1cddbe2f 100755
 -    sudo sysctl --system
 +#    sudo sysctl --system
      nat64_start || die 'Failed to start NAT64!'
-     dns64_start || die 'Failed to start DNS64!'
      firewall_start || die 'Failed to start firewall'
-     if have systemctl; then
--        systemctl is-active rsyslog || sudo systemctl start rsyslog || die 'Failed to start rsyslog!'
--        systemctl is-active dbus || sudo systemctl start dbus || die 'Failed to start dbus!'
-+        systemctl is-active syslog || sudo systemctl start syslog || die 'Failed to start syslog!'
-+        systemctl is-active dbus-1 || sudo systemctl start dbus-1 || die 'Failed to start dbus-1!'
-         systemctl is-active avahi-daemon || sudo systemctl start avahi-daemon || die 'Failed to start avahi!'
-         without WEB_GUI || systemctl is-active otbr-web || sudo systemctl start otbr-web || die 'Failed to start otbr-web!'
-         systemctl is-active otbr-agent || sudo systemctl start otbr-agent || die 'Failed to start otbr-agent!'
-     elif have service; then
--        sudo service rsyslog status || sudo service rsyslog start || die 'Failed to start rsyslog!'
--        sudo service dbus status || sudo service dbus start || die 'Failed to start dbus!'
-+        test -e $SYSLOG_FOLDER || mkdir $SYSLOG_FOLDER
-+        sudo service syslog status || sudo service syslog start || die 'Failed to start syslog!'
-+        sudo service dbus-1 status || sudo service dbus-1 start || die 'Failed to start dbus-1!'
-         # Tolerate the mdns failure as it is installed for only CI docker.
-         sudo service mdns status || sudo service mdns start || echo "service mdns is not available!"
+-
+-    start_service rsyslog
+-    start_service dbus
++    test -e $SYSLOG_FOLDER || mkdir $SYSLOG_FOLDER
++    start_service syslog
++    start_service dbus-1
+     # Thread Certification tests require Avahi to publish records for tests. Since the
+     # same image is used for all tests Avahi needs to be started here and if
+     # building a reference device.
+     if [[ ${OTBR_MDNS} == "avahi" || ${OT_BACKBONE_CI} == 1 || ${REFERENCE_DEVICE} == 1 ]]; then
 +        test -e $AVAHI_DAEMON_PID_FILDER && rm -rf $AVAHI_DAEMON_PID_FILDER
-         sudo service avahi-daemon status || sudo service avahi-daemon start || die 'Failed to start avahi!'
-         sudo service otbr-agent status || sudo service otbr-agent start || die 'Failed to start otbr-agent!'
-         without WEB_GUI || sudo service otbr-web status || sudo service otbr-web start || die 'Failed to start otbr-web!'
-@@ -71,14 +76,14 @@ shutdown()
-     dns64_stop || echo 'Failed to stop DNS64!'
+         start_service avahi-daemon
+     fi
+     if have service; then
+@@ -70,10 +74,10 @@ shutdown()
+     nat64_stop || echo 'Failed to stop NAT64!'
      firewall_stop || echo 'Failed to stop firewall'
-     if have systemctl; then
--        systemctl is-active rsyslog && sudo systemctl stop rsyslog || echo 'Failed to stop rsyslog!'
--        systemctl is-active dbus && sudo systemctl stop dbus || echo 'Failed to stop dbus!'
-+        systemctl is-active syslog && sudo systemctl stop syslog || echo 'Failed to stop syslog!'
-+        systemctl is-active dbus-1 && sudo systemctl stop dbus-1 || echo 'Failed to stop dbus-1!'
-         systemctl is-active avahi-daemon && sudo systemctl stop avahi-daemon || echo 'Failed to stop avahi!'
-         without WEB_GUI || systemctl is-active otbr-web && sudo systemctl stop otbr-web || echo 'Failed to stop otbr-web!'
-         systemctl is-active otbr-agent && sudo systemctl stop otbr-agent || echo 'Failed to stop otbr-agent!'
-     elif have service; then
--        sudo service rsyslog status && sudo service rsyslog stop || echo 'Failed to stop rsyslog!'
--        sudo service dbus status && sudo service dbus stop || echo 'Failed to stop dbus!'
-+        sudo service syslog status && sudo service syslog stop || echo 'Failed to stop syslog!'
-+        sudo service dbus-1 status && sudo service dbus-1 stop || echo 'Failed to stop dbus-1!'
-         sudo service mdns status && sudo service mdns stop || echo "service mdns is not available!"
-         sudo service avahi-daemon status && sudo service avahi-daemon stop || echo 'Failed to stop avahi!'
-         sudo service otbr-agent status && sudo service otbr-agent stop || echo 'Failed to stop otbr-agent!'
+ 
+-    stop_service rsyslog
+-    stop_service dbus
++    stop_service syslog
++    stop_service dbus-1
+     if [[ ${OTBR_MDNS} == "avahi" || ${OT_BACKBONE_CI} == 1 || ${REFERENCE_DEVICE} == 1 ]]; then
+-        systemctl is-active avahi-daemon && sudo systemctl stop avahi-daemon || echo 'Failed to stop avahi!'
++    	stop_service avahi-daemon
+     fi
+     if have service; then
+         stop_service mdns
 diff --git a/script/setup b/script/setup
-index 8262be89d2..15686ed73b 100755
+index 2bf13c0510c..03e25c845be 100755
 --- a/script/setup
 +++ b/script/setup
-@@ -41,7 +41,7 @@
- . script/_network_manager
+@@ -40,14 +40,14 @@
+ . script/_dhcpv6_pd_ref
  . script/_rt_tables
  . script/_swapfile
 -. script/_sudo_extend
 +#. script/_sudo_extend
- . script/_disable_services
  . script/_firewall
  
-@@ -49,9 +49,9 @@ main()
+ main()
  {
      # shellcheck source=/dev/null
      . "$BEFORE_HOOK"
 -    extend_sudo_timeout
-+    #extend_sudo_timeout
++#    extend_sudo_timeout
      setup_swapfile
--    disable_services
-+    #disable_services
      otbr_uninstall
      border_routing_uninstall
-     network_manager_uninstall
 -- 
-2.17.1
+2.33.0.windows.1
 

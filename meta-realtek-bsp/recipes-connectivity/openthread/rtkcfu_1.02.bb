@@ -29,10 +29,10 @@ do_install () {
 	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v0_0_97_0_RTL8771HTV_ImgPacketFile_Bank0_Lower_Stack_Patch.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
 	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v0_0_250_6_RTL8771HTV_ImgPacketFile_Bank0_Rom_Patch.offer.bin ${D}/lib/firmware/rtkcfu/8771HTV
 	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v0_0_250_6_RTL8771HTV_ImgPacketFile_Bank0_Rom_Patch.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
-	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_0_3_0_RTL8771HTV_ImgPacketFile_Bank0_App.offer.bin ${D}/lib/firmware/rtkcfu/8771HTV
-	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_0_3_0_RTL8771HTV_ImgPacketFile_Bank0_App.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
-	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_2_2_0_RTL8771HTV_ImgPacketFile_Bank0_FSBL.offer.bin ${D}/lib/firmware/rtkcfu/8771HTV
-	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_2_2_0_RTL8771HTV_ImgPacketFile_Bank0_FSBL.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
+	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_0_4_1_RTL8771HTV_ImgPacketFile_Bank0_App.offer.bin ${D}/lib/firmware/rtkcfu/8771HTV
+	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_0_4_1_RTL8771HTV_ImgPacketFile_Bank0_App.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
+	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_2_4_0_RTL8771HTV_ImgPacketFile_Bank0_FSBL.offer.bin ${D}/lib/firmware/rtkcfu/8771HTV
+	install -m 644 ${RTKDIR}/development/openthread/8771HTV/v1_2_4_0_RTL8771HTV_ImgPacketFile_Bank0_FSBL.payload.bin ${D}/lib/firmware/rtkcfu/8771HTV
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

@@ -1,20 +1,23 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=87109e44b2fda96a8991f27684a7349c \
-                    file://third_party/Simple-web-server/repo/LICENSE;md5=091ac9fd29d87ad1ae5bf765d95278b0 \
                     file://third_party/cJSON/repo/LICENSE;md5=218947f77e8cb8e2fa02918dc41c50d0 \
                     file://third_party/http-parser/repo/LICENSE-MIT;md5=9bfa835d048c194ab30487af8d7b3778 \
                     file://third_party/openthread/repo/LICENSE;md5=543b6fe90ec5901a683320a36390c65f \
                     "
 DEPENDS += "protobuf-native protobuf"
-SRCREV = "055ceb42645feb95aeaebe6b81e4619f82a281a5"
+SRCREV = "671eac3a34dfb3e0b9799739fb2c62693eab2d0c"
 
-SRC_URI += "file://0001-PATCH-otbr-agent.init.in-modify-lsb-related-function.patch \
-		   file://0002-PATCH-otbr-web.init.in-modify-lsb-related-functions.patch \
-		   file://0003-PATCH-scripts-use-proper-cmd-service-in-yocto-platfo.patch \
-		   file://0004-PATCH-openthread-makefile-add-macro-for-testharness.patch \
-		   file://0005-PATCH-run-rtkcfu-before-otbr-agent-start.patch \
-		   file://init \
+SRC_URI = "gitsm://github.com/openthread/ot-br-posix.git;protocol=https;branch=main \
+           file://0001-otbr-agent.service.in-remove-pre-exec-hook-for-mdns-.patch \
+           file://0001-cmake-Disable-nonnull-compare-warning-on-gcc.patch \
+           file://default-cxx-std.patch \
+           file://0001-PATCH-otbr-agent.init.in-modify-lsb-related-function.patch \
+           file://0002-PATCH-otbr-web.init.in-modify-lsb-related-functions.patch \
+           file://0003-PATCH-scripts-use-proper-cmd-service-in-yocto-platfo.patch \
+           file://0004-PATCH-openthread-makefile-add-macro-for-testharness.patch \
+           file://0005-PATCH-run-rtkcfu-before-otbr-agent-start.patch \
+           file://init \
            "
 
 inherit update-rc.d
@@ -42,7 +45,6 @@ EXTRA_OECMAKE = "-DBUILD_TESTING=OFF \
                  -DOTBR_SRP_ADVERTISING_PROXY=ON \
                  -DOTBR_BORDER_AGENT=ON \
                  -DOT_SPINEL_RESET_CONNECTION=ON \
-                 -DOT_TREL=ON \
                  -DOT_MLR=ON \
                  -DOT_SRP_SERVER=ON \
                  -DOT_ECDSA=ON \
