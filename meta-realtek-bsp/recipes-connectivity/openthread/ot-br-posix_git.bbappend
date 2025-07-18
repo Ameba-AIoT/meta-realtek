@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=87109e44b2fda96a8991f27684a7349c \
                     file://third_party/http-parser/repo/LICENSE-MIT;md5=9bfa835d048c194ab30487af8d7b3778 \
                     file://third_party/openthread/repo/LICENSE;md5=543b6fe90ec5901a683320a36390c65f \
                     "
-DEPENDS += "protobuf-native protobuf"
+DEPENDS += "protobuf-native protobuf mdns"
 SRCREV = "671eac3a34dfb3e0b9799739fb2c62693eab2d0c"
 
 SRC_URI = "gitsm://github.com/openthread/ot-br-posix.git;protocol=https;branch=main \
@@ -17,6 +17,7 @@ SRC_URI = "gitsm://github.com/openthread/ot-br-posix.git;protocol=https;branch=m
            file://0003-PATCH-scripts-use-proper-cmd-service-in-yocto-platfo.patch \
            file://0004-PATCH-openthread-makefile-add-macro-for-testharness.patch \
            file://0005-PATCH-run-rtkcfu-before-otbr-agent-start.patch \
+           file://0006-PATCH-add-SO_REUSEADDR-for-openthread-posix-pla.patch \
            file://init \
            "
 
@@ -39,7 +40,7 @@ EXTRA_OECMAKE = "-DBUILD_TESTING=OFF \
                  -DOTBR_REST=ON \
                  -DOTBR_WEB=OFF \
                  -DCMAKE_LIBRARY_PATH=${libdir} \
-                 -DOTBR_MDNS=avahi \
+                 -DOTBR_MDNS=mDNSResponder \
                  -DOTBR_BACKBONE_ROUTER=ON \
                  -DOTBR_BORDER_ROUTING=ON \
                  -DOTBR_SRP_ADVERTISING_PROXY=ON \

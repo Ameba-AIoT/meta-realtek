@@ -1,0 +1,32 @@
+From 29391b933b13878f3b14d05eee6ffa9e80709fc9 Mon Sep 17 00:00:00 2001
+From: xuebin_wu <xuebin_wu@realsil.com.cn>
+Date: Thu, 17 Jul 2025 09:57:23 +0800
+Subject: [PATCH] add SO_REUSEADDR for openthread posix platform UDP
+
+---
+ third_party/openthread/repo/src/posix/platform/udp.cpp | 3 ++++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/third_party/openthread/repo/src/posix/platform/udp.cpp b/third_party/openthread/repo/src/posix/platform/udp.cpp
+index 702580790..00c8cc2c4 100644
+--- a/third_party/openthread/repo/src/posix/platform/udp.cpp
++++ b/third_party/openthread/repo/src/posix/platform/udp.cpp
+@@ -233,12 +233,15 @@ otError otPlatUdpSocket(otUdpSocket *aUdpSocket)
+ {
+     otError error = OT_ERROR_NONE;
+     int     fd;
++    int yes = 1;
+ 
+     assert(aUdpSocket->mHandle == nullptr);
+ 
+     fd = ot::Posix::SocketWithCloseExec(AF_INET6, SOCK_DGRAM, IPPROTO_UDP, ot::Posix::kSocketNonBlock);
+     VerifyOrExit(fd >= 0, error = OT_ERROR_FAILED);
+ 
++    VerifyOrExit(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&yes, sizeof(yes)) >= 0, error = OT_ERROR_FAILED);
++
+     aUdpSocket->mHandle = FdToHandle(fd);
+ 
+ exit:
+-- 
+2.33.0.windows.1
+
