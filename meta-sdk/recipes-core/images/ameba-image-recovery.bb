@@ -7,6 +7,16 @@ inherit image
 IMAGE_FEATURES = ""
 IMAGE_LINGUAS = ""
 
+IMAGE_INSTALL += " \
+    recovery \
+    kernel-modules \
+    wpa-supplicant \
+    dhcpcd \
+    swupdate \
+    libubootenv \
+    libubootenv-bin \
+"
+
 IMAGE_FSTYPES = "${INITRAMFS_FSTYPES}"
 PACKAGE_INSTALL = "${IMAGE_INSTALL}"
 

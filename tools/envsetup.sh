@@ -238,6 +238,10 @@ function m()
         cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.ubi ${deploy_dir}/rootfs.img
         cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.ubi ${deploy_dir}/userdata.img
     fi
+
+    if [ -e ${ROOTDIR}/sources/yocto/meta-realtek/tools/u-boot-env/u-boot-env.img ]; then
+        cp ${ROOTDIR}/sources/yocto/meta-realtek/tools/u-boot-env/u-boot-env.img ${deploy_dir}/u-boot-env.img
+    fi
 }
 
 function mkernel()

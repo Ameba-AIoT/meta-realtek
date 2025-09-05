@@ -1,0 +1,119 @@
+diff --git a/core/stream_interface.c b/core/stream_interface.c
+index f5cba496..01e221c6 100644
+--- a/core/stream_interface.c
++++ b/core/stream_interface.c
+@@ -644,6 +644,13 @@ void *network_initializer(void *data)
+ 				ERROR("%s cannot be opened", software->output);
+ 				ret = -ENODEV;
+ 			}
++
++			if (software->download_only) {
++				INFO("download swu image only, not install");
++				if (!(inst.fd < 0))
++					close(inst.fd);
++				goto skip_install;
++			}
+ 		}
+ 
+ 		if (!ret) {
+@@ -767,6 +774,7 @@ void *network_initializer(void *data)
+ 		swupdate_remove_directory(DATADST_DIR_SUFFIX);
+ #endif
+ 
++skip_install:
+ 		/*
+ 		 * Last step, if no restart is required,
+ 		 * SWUpdate can send automatically the feedback.
+diff --git a/core/swupdate.c b/core/swupdate.c
+index e7ec5694..9c454459 100644
+--- a/core/swupdate.c
++++ b/core/swupdate.c
+@@ -112,6 +112,7 @@ static struct option long_options[] = {
+ 	{"no-state-marker", no_argument, NULL, 'm'},
+ 	{"no-transaction-marker", no_argument, NULL, 'M'},
+ 	{"output", required_argument, NULL, 'o'},
++	{"download-only", no_argument, NULL, 'D'},
+ 	{"gen-swversions", required_argument, NULL, 's'},
+ 	{"preupdate", required_argument, NULL, 'P'},
+ 	{"postupdate", required_argument, NULL, 'p'},
+@@ -176,6 +177,7 @@ static void usage(char *programname)
+ 		" -M, --no-transaction-marker    : disable setting bootloader transaction marker\n"
+ 		" -m, --no-state-marker          : disable setting update state in bootloader\n"
+ 		" -o, --output <filename>        : saves the incoming stream\n"
++		" -D, --download_only            : download .swu image only, not install\n"
+ 		" -s, --gen-swversions <filename>: generate sw-versions file after successful installation\n"
+ 		" -v, --verbose                  : be verbose, set maximum loglevel\n"
+ 		"     --version                  : print SWUpdate version and exit\n"
+@@ -482,7 +484,7 @@ int main(int argc, char **argv)
+ #endif
+ 	memset(main_options, 0, sizeof(main_options));
+ 	memset(image_url, 0, sizeof(image_url));
+-	strcpy(main_options, "vhni:e:E:gq:l:Lcf:p:P:o:s:N:R:MmB:");
++	strcpy(main_options, "Dvhni:e:E:gq:l:Lcf:p:P:o:s:N:R:MmB:");
+ #ifdef CONFIG_MTD
+ 	strcat(main_options, "b:");
+ #endif
+@@ -663,6 +665,9 @@ int main(int argc, char **argv)
+ 		case 'L':
+ 			swcfg.syslog_enabled = true;
+ 			break;
++		case 'D':
++			swcfg.download_only = true;
++			break;
+ 		case 'k':
+ 			strlcpy(swcfg.publickeyfname,
+ 				optarg,
+diff --git a/include/swupdate.h b/include/swupdate.h
+index a36ffb87..ea7a75d8 100644
+--- a/include/swupdate.h
++++ b/include/swupdate.h
+@@ -61,6 +61,7 @@ struct swupdate_cfg {
+ 	char forced_signer_name[SWUPDATE_GENERAL_STRING_SIZE];
+ 	char namespace_for_vars[SWUPDATE_GENERAL_STRING_SIZE];
+ 	void *lua_state;
++	bool download_only;
+ 	bool syslog_enabled;
+ 	bool no_downgrading;
+ 	bool no_reinstalling;
+diff --git a/suricatta/server_hawkbit.c b/suricatta/server_hawkbit.c
+index 342670cd..96275f9b 100644
+--- a/suricatta/server_hawkbit.c
++++ b/suricatta/server_hawkbit.c
+@@ -902,6 +902,13 @@ server_op_res_t server_handle_initial_state(update_state_t stateovrrd)
+ 		}
+ 	}
+ 
++	/* reset ustate == 0*/
++	if (save_state(STATE_OK) != SERVER_OK) {
++		ERROR("Error while resetting update state on persistent "
++		      "storage.\n");
++		return SERVER_EINIT;
++	}
++
+ 	const char *reply_result;
+ 	const char *reply_execution;
+ 	const char *reply_message;
+@@ -1487,6 +1494,7 @@ static server_op_res_t server_install_update(void)
+ 			}
+ 			goto cleanup;
+ 		}
++
+ 		if (server_send_deployment_reply(
+ 			server_hawkbit.channel,
+ 			action_id, json_data_chunk_max,
+@@ -1530,6 +1538,15 @@ cleanup:
+ 			result = msg.type == ACK ? SERVER_OK : SERVER_EERR;
+ 			DEBUG("%s", msg.data.msg);
+ 		}
++
++		if (server_send_deployment_reply(
++			server_hawkbit.channel,
++			action_id, 0, 0, reply_status_result_finished.success,
++			reply_status_execution.closed, 1,
++			&details) != SERVER_OK) {
++			ERROR("Error while reporting installation progress to "
++			      "server.\n");
++		}
+ 	}
+ 	return result;
+ }

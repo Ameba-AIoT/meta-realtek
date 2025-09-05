@@ -1,0 +1,13 @@
+addmisc=setenv bootargs ${bootargs}
+console=ttyS0,${baudrate} panic=1
+baudrate=57600
+bootcmd=mtd opt_read - 0x60380000 0x60370000 0x400000 0x10000 0x500000 0x10000;bootm 0x60380000 - 0x60370000;
+bootdelay=3
+bootfile=/vmlinux.elf
+entry=normal
+fdt_high=0xffffffff
+fdtcontroladdr=63d4a7e0
+load=tftp 80500000 ${u-boot}
+stderr=dwapb@4200c000
+stdin=dwapb@4200c000
+stdout=dwapb@4200c000
