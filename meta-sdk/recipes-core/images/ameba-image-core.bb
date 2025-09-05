@@ -31,7 +31,7 @@ IMAGE_INSTALL += " \
     udev-extraconf \
     rtk-rc-local \
     lvgl \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'rtk-fwk-full', 'packagegroup-rtk-test rtk-gui rtk-aivoice-algo', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'rtk-fwk-full', 'packagegroup-rtk-test rtk-gui', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'matter', 'packagegroup-matter-examples', '', d)} \
 "
 
