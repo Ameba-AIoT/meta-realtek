@@ -336,6 +336,12 @@ if [ -z "$KEY_DIR" ] || [ -z "$BOOT_IMAGE" ] || \
     exit 1
 fi
 
+if [ ! -e "$KEY_DIR"/amebasmart_gcc_project ]; then
+	mkdir -p "$KEY_DIR"/amebasmart_gcc_project
+	cp -fr $SCRIPT_PATH/security_keys/test/amebasmart_gcc_project/ameba_layout.ld "$KEY_DIR"/amebasmart_gcc_project/
+	cp -fr $SCRIPT_PATH/security_keys/test/info.json "$KEY_DIR"/
+fi
+
 if [ ! -d "$OUTPUT_DIR" ]; then
     mkdir -p $OUTPUT_DIR
 fi
@@ -454,12 +460,7 @@ function make_secure_firmware()
     # cut the original manifest head to remake it
     tail -c +4097 $KM4_BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin
 
-    python3 $AXF2BIN manifest \
-        $KEY_DIR/manifest.json \
-        $KEY_DIR/manifest.json \
-        $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin \
-        $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin \
-        boot
+    python3 $AXF2BIN  --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin
 
     cat $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin \
         $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin \
@@ -472,20 +473,12 @@ function make_secure_firmware()
     # cut the original manifest and cert head to remake it
     tail -c +8193 $KM4_APP_IMAGE > $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin
 
-    python3 $AXF2BIN manifest \
-        $KEY_DIR/manifest.json \
-        $KEY_DIR/manifest.json \
-        $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin \
-        $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin \
-        app
+    python3 $AXF2BIN --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin
 
-    python3 $AXF2BIN cert \
-        $KEY_DIR/manifest.json \
-        $KEY_DIR/manifest.json \
-        $OUTPUT_DIR/secure-auxiliary/cert.bin \
-        0 app \
+    python3 $AXF2BIN --extern-dir $KEY_DIR encrypt cert -o $OUTPUT_DIR/secure-auxiliary/cert.bin --entry-pairs \
+    	0 image2   \
         1 vbmeta \
-        2 app
+        2 image2  
 
     cat $OUTPUT_DIR/secure-auxiliary/cert.bin \
         $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin \
@@ -497,17 +490,12 @@ function make_secure_firmware()
     # 3. make secure linux boot image
 
     # cut the original manifest head to remake it
-    tail -c +4097 $BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/boot.img
+    tail -c +4097 $BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/ap_image_all.img
 
-    python3 $AXF2BIN manifest \
-        $KEY_DIR/manifest.json \
-        $KEY_DIR/manifest.json \
-        $OUTPUT_DIR/secure-auxiliary/boot.img \
-        $OUTPUT_DIR/secure-auxiliary/manifest_boot.bin \
-        app
+    python3 $AXF2BIN  --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/ap_image_all.img -o $OUTPUT_DIR/secure-auxiliary/manifest_boot.bin
 
     cat $OUTPUT_DIR/secure-auxiliary/manifest_boot.bin \
-        $OUTPUT_DIR/secure-auxiliary/boot.img \
+        $OUTPUT_DIR/secure-auxiliary/ap_image_all.img \
         > $OUTPUT_DIR/boot.img
 
     echo_info "=> Install: $OUTPUT_DIR/boot.img"
@@ -519,12 +507,7 @@ function make_secure_firmware()
     fi
     head -zc -4096 $IMGTOOL_FLASHLODER_IMG > $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin
 
-    python3 $AXF2BIN manifest \
-        $KEY_DIR/manifest.json \
-        $KEY_DIR/manifest.json \
-        $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin \
-        $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin \
-        boot
+    python3 $AXF2BIN  --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin
 
     cat $OUTPUT_DIR/secure-auxiliary/ram_1_prepend.bin $OUTPUT_DIR/secure-auxiliary/manifest_loader.bin > $OUTPUT_DIR/floader_amebasmart.bin
 
@@ -541,3 +524,5 @@ if [ ! -z "$RECOVERY_DTB_IMAGE" ] && [ ! -z "$RECOVERY_DTB_PARTITION_SIZE" ] && 
 echo "Start to make recovery secure images."
 make_secure_recovery
 fi
+
+echo "Make secure images end."

@@ -19,12 +19,12 @@ mkdir -p $KEY_DIR
 # Generate firmware key
 ############################################################
 # 1. generate the root key used for km4 boot & cert
-python3 $SCRIPT_PATH/axf2bin.py keypair ed25519 $KEY_DIR/root.key
+python3 $SCRIPT_PATH/axf2bin.py encrypt keypair -a ed25519 -o $KEY_DIR/root.key
 
 sleep 1
 
 # 2. generate the fw key to verify km4 app image
-python3 $SCRIPT_PATH/axf2bin.py keypair ed25519 $KEY_DIR/fw.key
+python3 $SCRIPT_PATH/axf2bin.py encrypt keypair -a ed25519 -o $KEY_DIR/fw.key
 
 
 ############################################################
@@ -32,7 +32,9 @@ python3 $SCRIPT_PATH/axf2bin.py keypair ed25519 $KEY_DIR/fw.key
 ############################################################
 # 1. generate rsa2048 key to sign vbmeta image
 openssl genrsa -out $KEY_DIR/vbmeta.priv.key 2048
-python2.7 $SCRIPT_PATH/avbtool extract_public_key --key $KEY_DIR/vbmeta.priv.key --output $KEY_DIR/vbmeta.pub.key
+python3 $SCRIPT_PATH/avbtool extract_public_key --key $KEY_DIR/vbmeta.priv.key --output $KEY_DIR/vbmeta.pub.key
+
+PRIV_HASH=$(openssl rsa -in $KEY_DIR/vbmeta.priv.key -pubout -outform DER | sha256sum | cut -d' ' -f1 | tr 'a-f' 'A-F')
 
 # 2. get public key's sha256
 sha256sum -b $KEY_DIR/vbmeta.pub.key > $KEY_DIR/vbmeta.pub.sha256
@@ -40,10 +42,9 @@ PUBK_HASH=$(cat $KEY_DIR/vbmeta.pub.sha256 | cut -c1-64)
 
 # 3. format pubk hash as elf2bin's json format
 echo '{' > $KEY_DIR/vbmeta.key
-echo -e '\t"algorithm":"none",' >> $KEY_DIR/vbmeta.key
-echo -e '\t"private key":"none",' >> $KEY_DIR/vbmeta.key
-echo -e '\t"public key":"none",' >> $KEY_DIR/vbmeta.key
-echo -e "\t\"public key hash\":\"$PUBK_HASH\"" >> $KEY_DIR/vbmeta.key
+echo -e "    sboot_private_key: \"$PRIV_HASH\"," >> $KEY_DIR/vbmeta.key
+echo -e "    sboot_public_key: \"$PUBK_HASH\"," >> $KEY_DIR/vbmeta.key
+echo -e "    sboot_public_key_hash: \"$PUBK_HASH\"," >> $KEY_DIR/vbmeta.key
 echo '}' >> $KEY_DIR/vbmeta.key
 
 rm -rf $KEY_DIR/vbmeta.pub.sha256
@@ -52,40 +53,93 @@ rm -rf $KEY_DIR/vbmeta.pub.sha256
 ############################################################
 # Combine key as elf2bin's format
 ############################################################
-ROOT_KEY=$(sed -n '2,5p' $KEY_DIR/root.key)
-FW_KEY=$(sed -n '2,5p' $KEY_DIR/fw.key)
-VBMETA_KEY=$(sed -n '2,5p' $KEY_DIR/vbmeta.key)
+ROOT_KEY=$(sed -n '3,5p' $KEY_DIR/root.key)
+FW_KEY=$(sed -n '3,5p' $KEY_DIR/fw.key)
+VBMETA_KEY=$(sed -n '2,4p' $KEY_DIR/vbmeta.key)
+ROOT_PRIV_KEY=$(grep '"private_key"' $KEY_DIR/root.key | sed 's/.*"[^"]*":[[:space:]]*//')
+ROOT_PUB_KEY=$(grep '"public_key"' $KEY_DIR/root.key | sed 's/.*"[^"]*":[[:space:]]*//')
 
-echo "{" > $KEY_DIR/key.json
+echo '/*' > $KEY_DIR/manifest.json5
+echo ' * This manifest.json5 script configures firmware security features including secure boot (sboot) and image encryption (RSIP/RDP).' >> $KEY_DIR/manifest.json5
+echo ' * It employs a hierarchical configuration mechanism: firmware-specific settings override global configurations when defined,' >> $KEY_DIR/manifest.json5
+echo ' * while inheriting outer-layer settings when undefined, enabling flexible security policy management.' >> $KEY_DIR/manifest.json5
+echo ' */' >> $KEY_DIR/manifest.json5
+echo -ne "\n" >> $KEY_DIR/manifest.json5
 
-echo '    "boot":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$ROOT_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo "{" >> $KEY_DIR/manifest.json5
+echo '  version: 1,' >> $KEY_DIR/manifest.json5
 
-echo '    "cert":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$ROOT_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo '  image1: {' >> $KEY_DIR/manifest.json5
+echo '    img_id: 0,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_major: 1,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_minor: 1,' >> $KEY_DIR/manifest.json5
+echo '    huk_epoch: 1,' >> $KEY_DIR/manifest.json5
+echo '    rsip_iv: "0102030405060708",' >> $KEY_DIR/manifest.json5
+echo "$ROOT_KEY," >> $KEY_DIR/manifest.json5
+echo "  }," >> $KEY_DIR/manifest.json5
+echo -ne "\n" >> $KEY_DIR/manifest.json5
 
-echo '    "app":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$FW_KEY" >> $KEY_DIR/key.json
-echo "    }," >> $KEY_DIR/key.json
-echo -e "\n" >> $KEY_DIR/key.json
+echo '  /* cert/image2 share img_id/img_ver, cert and image3 img are packed in amebaxxx_app.bin */' >> $KEY_DIR/manifest.json5
+echo '  cert: {' >> $KEY_DIR/manifest.json5
+echo "$ROOT_KEY," >> $KEY_DIR/manifest.json5
+echo "  }," >> $KEY_DIR/manifest.json5
 
-echo '    "vbmeta":' >> $KEY_DIR/key.json
-echo "    {" >> $KEY_DIR/key.json
-echo        "$VBMETA_KEY" >> $KEY_DIR/key.json
-echo "    }" >> $KEY_DIR/key.json
-echo "}" >> $KEY_DIR/key.json
+echo '  image2: {' >> $KEY_DIR/manifest.json5
+echo '    img_id: 1,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_major: 1,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_minor: 1,' >> $KEY_DIR/manifest.json5
+echo '    huk_epoch: 1,' >> $KEY_DIR/manifest.json5
+echo '    rsip_iv: "213253647586a7b8",' >> $KEY_DIR/manifest.json5
+echo "$FW_KEY," >> $KEY_DIR/manifest.json5
+echo "  }," >> $KEY_DIR/manifest.json5
+
+echo '  vbmeta: {' >> $KEY_DIR/manifest.json5
+echo '    img_id: 2,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_major: 1,' >> $KEY_DIR/manifest.json5
+echo '    img_ver_minor: 1,' >> $KEY_DIR/manifest.json5
+echo '    huk_epoch: 1,' >> $KEY_DIR/manifest.json5
+echo '    rsip_iv: "213253647586a7b8",' >> $KEY_DIR/manifest.json5
+echo "$VBMETA_KEY" >> $KEY_DIR/manifest.json5
+echo "  }," >> $KEY_DIR/manifest.json5
+
+echo '  image3: {' >> $KEY_DIR/manifest.json5
+echo '    rdp_enable: false,' >> $KEY_DIR/manifest.json5
+echo '    rdp_iv: "0123456789abcdef",' >> $KEY_DIR/manifest.json5
+echo '    rdp_key: "otp_key_0x200",' >> $KEY_DIR/manifest.json5
+echo "  }," >> $KEY_DIR/manifest.json5
+
+echo -ne "\n" >> $KEY_DIR/manifest.json5
+echo -e '  /* ============================ Secure Boot global settings ============================ */' >> $KEY_DIR/manifest.json5
+echo -e '  sboot_enable: true,' >> $KEY_DIR/manifest.json5
+echo -e '  /* sboot_algorithm valid option: "ed25519"/"secp192r1"/"secp224r1"/"secp256r1"/"bp256r1"/"secp192k1"/"secp224k1"/"secp256k1" */' >> $KEY_DIR/manifest.json5
+echo -e '  sboot_algorithm: "ed25519",' >> $KEY_DIR/manifest.json5
+echo -e '  /* sboot_hash_alg valid option: "sha256"/"sha384"/"sha512"/"hmac256"/"hmac384"/"hmac512" */' >> $KEY_DIR/manifest.json5
+echo -e '  sboot_hash_alg: "sha256",' >> $KEY_DIR/manifest.json5
+echo -e '  sboot_hmac_key: "otp_key_0x220",' >> $KEY_DIR/manifest.json5
+echo -ne "\n" >> $KEY_DIR/manifest.json5
+
+echo -e '  /* ================================ RSIP global settings =============================== */' >> $KEY_DIR/manifest.json5
+echo -e '  rsip_enable: false,' >> $KEY_DIR/manifest.json5
+echo -e '  /* rsip_mode valid option: 1 (XTS), 0 (CTR) */' >> $KEY_DIR/manifest.json5
+echo -e '  rsip_mode: 1,' >> $KEY_DIR/manifest.json5
+echo -e '  /* rsip_key_group valid option: "rsip_xts_g0", "rsip_ctr_g0" */' >> $KEY_DIR/manifest.json5
+echo -e '  rsip_key_group: "rsip_xts_g0",' >> $KEY_DIR/manifest.json5
+echo -e '  /* rsip key group define, uses do not modify */' >> $KEY_DIR/manifest.json5
+echo -e '  rsip_xts_g0: ["otp_key_0x2C0", "otp_key_0x2E0"],' >> $KEY_DIR/manifest.json5
+echo -e '  /* ctr mode not recommend */' >> $KEY_DIR/manifest.json5
+echo -e '  rsip_ctr_g0: ["otp_key_0x2E0"],' >> $KEY_DIR/manifest.json5
+echo -ne "\n" >> $KEY_DIR/manifest.json5
+
+echo -e '  /* =================================== OTP key value =================================== */' >> $KEY_DIR/manifest.json5
+echo -e "  otp_key_0x2C0: $ROOT_PUB_KEY" >> $KEY_DIR/manifest.json5
+echo -e "  otp_key_0x2E0: $ROOT_PRIV_KEY" >> $KEY_DIR/manifest.json5
+echo -e '  otp_key_0x200: "c9a8b1f4e7d293b6a5d8f009be6c3d21e4a7b8f5d3b901a984087844c2f7b6e0",' >> $KEY_DIR/manifest.json5
+echo -e '  otp_key_0x220: "9874918301909234686574856692873911223344556677889900aabbccddeeff",' >> $KEY_DIR/manifest.json5
+
+echo "}" >> $KEY_DIR/manifest.json5
+
+sed -i -e 's/"private_key"/  sboot_private_key/g' $KEY_DIR/manifest.json5
+sed -i -e 's/"public_key"/  sboot_public_key/g' $KEY_DIR/manifest.json5
+sed -i -e 's/"public_key_hash"/  sboot_public_key_hash/g' $KEY_DIR/manifest.json5
 
 echo -e "\n\n******* New key generated *******"
-echo "[root key]: $KEY_DIR/root.key"
-echo "[fw key]: $KEY_DIR/fw.key"
-echo "[vbmeta key]: $KEY_DIR/vbmeta.key"
-echo "              $KEY_DIR/vbmeta.priv.key(private key)"
-echo "              $KEY_DIR/vbmeta.pub.key(public key)"
-echo "[keys json]: $KEY_DIR/key.json"

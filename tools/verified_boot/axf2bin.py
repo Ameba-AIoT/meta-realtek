@@ -1,1 +1,1 @@
-../../../../firmware/tools/image_scripts/axf2bin.py
+../../../../firmware/tools/scripts/axf2bin.py

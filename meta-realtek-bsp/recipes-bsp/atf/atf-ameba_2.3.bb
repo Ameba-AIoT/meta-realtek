@@ -10,6 +10,7 @@ inherit deploy
 inherit externalsrc
 
 AXF2BIN = "${RTKDIR}/yocto/meta-realtek/tools/verified_boot/axf2bin.py"
+DEFAULT_KEY_DIR = "${RTKDIR}/yocto/meta-realtek/tools/verified_boot/security_keys/test/"
 
 # requires CROSS_COMPILE set by hand as there is no configure script
 export CROSS_COMPILE="${TARGET_PREFIX}"
@@ -64,17 +65,17 @@ do_compile() {
     cat ${B}/build/amebasmart/debug/bl1_sram_prepend.bin \
         ${B}/build/amebasmart/debug/bl1_prepend.bin \
         ${B}/build/amebasmart/debug/fip_prepend.bin \
-        > boot_orig.img
+        > ap_image_all.img
 
-    # use the dummy manifest and key to create boot image
-    python3 ${AXF2BIN} manifest manifest.json key.json boot_orig.img manifest.bin app
-    cat manifest.bin boot_orig.img > boot.img
+    # use the default manifest and key to create boot image
+    python3 ${AXF2BIN} --extern-dir ${DEFAULT_KEY_DIR} encrypt manifest -i ap_image_all.img -o manifest.bin
+    cat manifest.bin ap_image_all.img > boot.img
 }
 
 do_install() {
     install -d ${D}/boot
     install -m 644 ${B}/build/amebasmart/debug/boot.img ${D}/boot/boot.img
-    install -m 644 ${B}/build/amebasmart/debug/boot_orig.img ${D}/boot/boot_orig.img
+    install -m 644 ${B}/build/amebasmart/debug/ap_image_all.img ${D}/boot/boot_orig.img
 }
 
 do_deploy() {

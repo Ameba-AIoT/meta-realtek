@@ -1,0 +1,1 @@
+../../../../../../../firmware/amebasmart_gcc_project/ameba_layout.ld
