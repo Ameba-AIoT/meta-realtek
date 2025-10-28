@@ -1,11 +1,11 @@
-SUMMARY = "Iwpriv for Realtek Ameba"
-DESCRIPTION = "Iwpriv for Realtek Ameba"
+SUMMARY = "Rtwpriv for Realtek Ameba"
+DESCRIPTION = "Rtwpriv for Realtek Ameba"
 HOMEPAGE = ""
 LICENSE = "CLOSED"
 
 inherit externalsrc
 
-EXTERNALSRC = "${RTKDIR}/development/wifi/iwpriv"
+EXTERNALSRC = "${RTKDIR}/development/wifi/rtwpriv"
 
 EXTRA_OEMAKE = " \
     CROSS_COMPILE=${HOST_PREFIX} \
@@ -21,7 +21,6 @@ do_compile() {
 
 do_install () {
     install -d ${D}${bindir}
-    install ${B}/iwpriv ${D}${bindir}
     install ${B}/rtwpriv ${D}${bindir}
 }
 

@@ -13,7 +13,7 @@ RDEPENDS:${PN} = "\
     iptables \
     iperf2 \
     iperf3 \
-    iwpriv \
+    rtwpriv \
     atwz \
     hostapd \
 "
