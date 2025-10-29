@@ -8,7 +8,7 @@ inherit externalsrc
 
 EXTERNALSRC = "${RTKDIR}/development/apps/aivoice/"
 
-AIVOICE_ALGO_LIB = "-L${S}/prebuilts/ameba_linux -laivoice -lafe_kernel -lafe_res_2mic50mm -lkernel -lvad -lkws -lasr -lfst -lnnns -ltensorflow-lite -lNE10 -lcJSON -ltomlc99 -laivoice_hal"
+AIVOICE_ALGO_LIB = "-L${S}/prebuilts/lib/ameba_linux -laivoice -lafe_kernel -lafe_res_2mic50mm -lkernel -lvad_v7_200K -lkws_xiaoqiangxiaoqiang_nihaoxiaoqiang_v4_300K -lasr_cn_v8_2M -lfst_cn_cmd_ac40 -lnnns_com_v7_35K -ltensorflow-lite -lNE10 -lcJSON -ltomlc99 -laivoice_hal"
 AIVOICE_ALGO_INC = "-I${S}/include/"
 
 
