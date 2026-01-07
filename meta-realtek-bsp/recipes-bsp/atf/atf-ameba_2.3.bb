@@ -14,6 +14,7 @@ DEFAULT_KEY_DIR = "${RTKDIR}/yocto/meta-realtek/tools/verified_boot/security_key
 
 # requires CROSS_COMPILE set by hand as there is no configure script
 export CROSS_COMPILE="${TARGET_PREFIX}"
+export AMEBA_SDK="${RTKDIR}/firmware"
 
 EXTERNALSRC = "${RTKDIR}/boot/arm-trusted-firmware"
 

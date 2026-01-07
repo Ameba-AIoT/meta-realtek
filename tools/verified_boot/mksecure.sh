@@ -6,6 +6,7 @@
 PROGNAME="mksecure.sh"
 
 SCRIPT_PATH=`dirname $0`
+FIRMWARE_PATH="$(realpath "$SCRIPT_PATH/../../../../firmware")"
 
 AXF2BIN=$SCRIPT_PATH/axf2bin.py
 AVBTOOL=$SCRIPT_PATH/avbtool
@@ -340,6 +341,7 @@ if [ ! -e "$KEY_DIR"/amebasmart_gcc_project ]; then
 	mkdir -p "$KEY_DIR"/amebasmart_gcc_project
 	cp -fr $SCRIPT_PATH/security_keys/test/amebasmart_gcc_project/ameba_layout.ld "$KEY_DIR"/amebasmart_gcc_project/
 	cp -fr $SCRIPT_PATH/security_keys/test/info.json "$KEY_DIR"/
+	cp -fr $SCRIPT_PATH/security_keys/test/soc_info.json "$KEY_DIR"/
 fi
 
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -513,6 +515,8 @@ function make_secure_firmware()
 
     echo_info "=> Install: $OUTPUT_DIR/floader_amebasmart.bin"
 }
+
+export AMEBA_SDK=$FIRMWARE_PATH
 
 echo
 echo "Start to make secure images."
