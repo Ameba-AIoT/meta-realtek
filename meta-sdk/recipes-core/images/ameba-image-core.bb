@@ -42,6 +42,13 @@ IMAGE_INSTALL:remove:rtl8730eah-va6 = " \
     lv-drivers \
 "
 
+IMAGE_INSTALL:remove:rtl8730eam-va6 = " \
+    packagegroup-rtk-multimedia \
+    rtk-gui \
+    lvgl \
+    lv-drivers \
+"
+
 inherit core-image
 
 ROOTFS_POSTPROCESS_COMMAND += '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs-delayed-postinsts", "remove_unneeded_files; ", "",d)}'

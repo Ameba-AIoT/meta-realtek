@@ -1,6 +1,6 @@
 S = "${WORKDIR}"
 
-do_install:rtl8730elh-recovery() {
+do_install:rtl8730e-recovery() {
     install -d ${D}${sysconfdir}
     install -D -m 0644 ${WORKDIR}/inittab ${D}${sysconfdir}/inittab
 

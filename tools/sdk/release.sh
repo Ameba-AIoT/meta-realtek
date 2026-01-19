@@ -187,7 +187,7 @@ function build_sdk() {
     echo_info "=> build verify sdk: $SDK_CHECK_DIR"
 
     cd $SDK_CHECK_DIR
-    source envsetup.sh -m rtl8730elh-va7 -d ameba-generic
+    source envsetup.sh -m rtl8730elm-va7 -d ameba-generic
     m
     cd -
 }

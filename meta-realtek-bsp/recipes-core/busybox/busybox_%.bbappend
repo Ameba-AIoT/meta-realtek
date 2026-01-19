@@ -1,14 +1,14 @@
 FILESEXTRAPATHS:prepend:= "${THISDIR}/${BPN}:"
 
-SRC_URI:append:rtl8730elh-recovery =" \
+SRC_URI:append:rtl8730e-recovery =" \
     file://recovery_init.cfg \
     file://ubi.cfg \
 "
-SRC_URI:append:rtl8730elh-va8 =" \
+SRC_URI:append:rtl8730elm-va8 =" \
     file://init.cfg \
     file://tools.cfg \
 "
-SRC_URI:append:rtl8730elh-va7 =" \
+SRC_URI:append:rtl8730elm-va7 =" \
     file://init.cfg \
     file://tools.cfg \
 "
@@ -16,8 +16,12 @@ SRC_URI:append:rtl8730eah-va6 =" \
     file://init.cfg \
     file://tools.cfg \
 "
+SRC_URI:append:rtl8730eam-va6 =" \
+    file://init.cfg \
+    file://tools.cfg \
+"
 
-do_prepare_config:rtl8730elh-recovery () {
+do_prepare_config:rtl8730e-recovery () {
 	export KCONFIG_NOTIMESTAMP=1
 
 	for i in 'CROSS' 'DISTRO FEATURES'; do echo "### $i"; done >> \
