@@ -288,15 +288,16 @@ function mfw()
         return
     fi
 
+    local chip_info="RTL8730E"
     local fw_build=${ROOTDIR}/sources/yocto/meta-realtek/tools/firmware.sh
     local fw_source=${ROOTDIR}/sources/firmware
-    local fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image
-    local mp_fw_image=$fw_source/amebasmart_gcc_project/project_hp/asdk/image_mp
-    local loader_bin_dir=$fw_source/amebasmart_gcc_project/project_hp/asdk/gnu_utility/image_tool_flashloader/amebasmart_acut
+    local fw_image=$fw_source/build_${chip_info}/build/project_hp/image
+    local mp_fw_image=$fw_source/build_${chip_info}/build/project_hp/image_mp
+    local loader_bin_dir=$fw_source/component/soc/amebasmart/project/project_hp/gnu_utility/image_tool_flashloader/amebasmart_acut
     local deploy_dir=${BUILDDIR}/tmp/deploy/images/${TARGET_MACHINE}
 
     if [ "$1" = "menuconfig" ]; then
-        $fw_build -s $fw_source -b menuconfig
+        $fw_build -s $fw_source -b menuconfig -c $chip_info
         return
     fi
 
@@ -311,8 +312,8 @@ function mfw()
         build_target="wifi"
     fi
 
-    echo_info "=> Build firmware: $fw_build -s $fw_source -b $build_target"
-    $fw_build -s $fw_source -b $build_target
+    echo_info "=> Build firmware: $fw_build -s $fw_source -b $build_target -c $chip_info"
+    $fw_build -s $fw_source -b $build_target -c $chip_info
     if [ $? -ne 0 ]; then
         echo_error "***************************************"
         echo_error "Build $build_target firmware error!!!"

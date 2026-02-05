@@ -43,25 +43,33 @@ function enable_linux_config()
 {
     echo "Enable linux config"
 
-    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if [ -z ${FW_SRC_DIR}/${PARA_FILENAME} ]; then
+        rm -f ${FW_SRC_DIR}/${PARA_FILENAME}
+    fi
+
     if [ -f ${CONFIG_DIR}/.config ]; then
-        cd ${GCCPROJECT_DIR}
-        ./menuconfig.py -s ${GCCPROJECT_DIR}/${PARA_FILENAME}
+        cd ${FW_SRC_DIR}
+        ./ameba.py menuconfig -s ${FW_SRC_DIR}/${PARA_FILENAME}
         cd -
     fi
 
     local LINUX_FW_EN_STRING="CONFIG_LINUX_FW_EN=y"
     local MP_NOT_INCLUDE_STRING="CONFIG_MP_INCLUDED=n"
-    if ! grep -q "$LINUX_FW_EN_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
-        echo "$LINUX_FW_EN_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
-    fi
-    if ! grep -q "$MP_NOT_INCLUDE_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
-        echo "$MP_NOT_INCLUDE_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if [ ! -z ${FW_SRC_DIR}/${PARA_FILENAME} ]; then
+        echo "$LINUX_FW_EN_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+        echo "$MP_NOT_INCLUDE_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+    else
+        if ! grep -q "$LINUX_FW_EN_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+            echo "$LINUX_FW_EN_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+        fi
+        if ! grep -q "$MP_NOT_INCLUDE_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+            echo "$MP_NOT_INCLUDE_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+        fi
     fi
 
-    cd ${GCCPROJECT_DIR}
-    ./menuconfig.py -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
-    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    cd ${FW_SRC_DIR}
+    ./ameba.py menuconfig -f ${FW_SRC_DIR}/${PARA_FILENAME}
+    rm -f ${FW_SRC_DIR}/${PARA_FILENAME}
     cd -
 }
 
@@ -69,29 +77,32 @@ function enable_linux_mp_config
 {
     echo "Enable linux mp config"
 
-    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if [ -z ${FW_SRC_DIR}/${PARA_FILENAME} ]; then
+        rm -f ${FW_SRC_DIR}/${PARA_FILENAME}
+    fi
+
     if [ -f ${CONFIG_DIR}/.config ]; then
-        cd ${GCCPROJECT_DIR}
-        ./menuconfig.py -s ${GCCPROJECT_DIR}/${PARA_FILENAME}
+        cd ${FW_SRC_DIR}
+        ./ameba.py menuconfig -s ${FW_SRC_DIR}/${PARA_FILENAME}
         cd -
     fi
 
     local LINUX_FW_EN_STRING="CONFIG_LINUX_FW_EN=y"
     local MP_INCLUDE_STRING="CONFIG_MP_INCLUDED=y"
     local MP_EXPAND_STRING="CONFIG_MP_EXPAND=y"
-    if ! grep -q "$LINUX_FW_EN_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
-        echo "$LINUX_FW_EN_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if ! grep -q "$LINUX_FW_EN_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+        echo "$LINUX_FW_EN_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
     fi
-    if ! grep -q "$MP_INCLUDE_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
-        echo "$MP_INCLUDE_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if ! grep -q "$MP_INCLUDE_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+        echo "$MP_INCLUDE_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
     fi
-    if ! grep -q "$MP_EXPAND_STRING" ${GCCPROJECT_DIR}/${PARA_FILENAME}; then
-        echo "$MP_EXPAND_STRING" >> ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    if ! grep -q "$MP_EXPAND_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+        echo "$MP_EXPAND_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
     fi
 
-    cd ${GCCPROJECT_DIR}
-    ./menuconfig.py -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
-    rm -f ${GCCPROJECT_DIR}/${PARA_FILENAME}
+    cd ${FW_SRC_DIR}
+    ./ameba.py menuconfig -f ${FW_SRC_DIR}/${PARA_FILENAME}
+    rm -f ${FW_SRC_DIR}/${PARA_FILENAME}
     cd -
 }
 
@@ -129,31 +140,38 @@ function reset_config
     fi
 }
 
+function setup_firmware_env
+{
+    ./env.sh
+    ./ameba.py soc ${CHIP_INFO}
+}
+
 function build_firmware
 {
+    cd ${FW_SRC_DIR}
+    setup_firmware_env
     bak_config
     enable_linux_config
-
-    cd ${GCCPROJECT_DIR}
-    ./build.py
+    ./ameba.py build
     cd -
 }
 
 function build_mp_firmware
 {
+    cd ${FW_SRC_DIR}
+    setup_firmware_env
     bak_config
     enable_linux_mp_config
-
-    cd ${GCCPROJECT_DIR}
-    ./build.py
+    ./ameba.py build
     cd -
 }
 
 function make_firmware_menuconfig
 {
+    cd ${FW_SRC_DIR}
+    setup_firmware_env
     bak_config
-    cd ${GCCPROJECT_DIR}
-    ./menuconfig.py
+    ./ameba.py menuconfig
     cd -
 }
 
@@ -161,16 +179,18 @@ function clean_firmware
 {
     reset_config
 
-    cd ${GCCPROJECT_DIR}
-    ./build.py -c
+    cd ${FW_SRC_DIR}
+    setup_firmware_env
+    ./ameba.py build -c
     cd -
 }
 
 usage() {
-    echo "Usage: ./firmware.sh -s <source> -b <target>"
+    echo "Usage: ./firmware.sh -s <source> -b <target> -c <chip>"
     echo "    Optional parameters:
     * [-s source]:  source directory
     * [-b target]:  target to build.
+    * [-c chip]:    chip to build.
     * [-h]:         help
 "
 }
@@ -178,12 +198,14 @@ usage() {
 FW_SRC_DIR="firmware"
 BUILD_TARGET="wifi"
 
-while getopts "s:b:h" setup_flag
+while getopts "s:b:c:h" setup_flag
 do
     case $setup_flag in
         s) FW_SRC_DIR="$OPTARG";
            ;;
         b) BUILD_TARGET="$OPTARG";
+           ;;
+        c) CHIP_INFO="$OPTARG";
            ;;
         h) setup_h='true';
            ;;
@@ -202,8 +224,8 @@ if [ ! -d ${FW_SRC_DIR} ]; then \
     exit 1
 fi
 
-GCCPROJECT_DIR=${FW_SRC_DIR}/amebasmart_gcc_project
-CONFIG_DIR=${GCCPROJECT_DIR}/menuconfig
+BUILD_DIR=${FW_SRC_DIR}/build_${CHIP_INFO}
+CONFIG_DIR=${BUILD_DIR}/menuconfig
 PARA_FILENAME=linux_para.conf
 
 if [ "$BUILD_TARGET" = "wifi" ]; then
