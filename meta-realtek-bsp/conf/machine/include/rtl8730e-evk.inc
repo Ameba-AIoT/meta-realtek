@@ -26,14 +26,14 @@ PREFERRED_VERSION_linux-yocto ?= "6.6%"
 KERNEL_IMAGETYPE = "uImage"
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
 KERNEL_DEVICETREE = "\
-    rtl8730elh-va7-generic.dtb \
-    rtl8730elh-va8-generic.dtb \
-    rtl8730elh-va7-full.dtb \
-    rtl8730elh-va8-full.dtb \
-    rtl8730elh-va7-tests.dtb \
-    rtl8730elh-va8-tests.dtb \
-    rtl8730elh-va7-recovery.dtb \
-    rtl8730elh-va8-recovery.dtb \
+    rtl8730elm-va7-generic.dtb \
+    rtl8730elm-va8-generic.dtb \
+    rtl8730elm-va7-full.dtb \
+    rtl8730elm-va8-full.dtb \
+    rtl8730elm-va7-tests.dtb \
+    rtl8730elm-va8-tests.dtb \
+    rtl8730elm-va7-recovery.dtb \
+    rtl8730elm-va8-recovery.dtb \
 "
 
 PREFERRED_PROVIDER_virtual/bootloader ?= "u-boot-ameba"

@@ -5,6 +5,7 @@ SUMMARY = "This is the userdata image."
 
 IMAGE_FSTYPES = "ubi"
 IMAGE_FSTYPES:rtl8730eah-va6 = "jffs2"
+IMAGE_FSTYPES:rtl8730eam-va6 = "jffs2"
 
 MKUBIFS_ARGS = "-m 2048 -e 126976 -c 297 --jrn-size=380928"
 UBINIZE_ARGS = "-m 2048 -p 131072"

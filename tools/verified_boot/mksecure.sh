@@ -288,7 +288,7 @@ fi
 # recovery kernel image
 if [ ! -z "$RECOVERY_DTB_IMAGE" ]; then
     if [ -z "$RECOVERY_KERNEL_IMAGE" ]; then
-        DEFAULT_RECOVERY_KERNEL_IMAGE="uImage-initramfs-rtl8730elh-recovery.bin"
+        DEFAULT_RECOVERY_KERNEL_IMAGE="uImage-initramfs-rtl8730e-recovery.bin"
         RECOVERY_KERNEL_IMAGE=$(dirname $RECOVERY_DTB_IMAGE)
         RECOVERY_KERNEL_IMAGE+=$SLASH_CHAR$DEFAULT_RECOVERY_KERNEL_IMAGE
         #echo "Use recovery kernel image: $RECOVERY_KERNEL_IMAGE"

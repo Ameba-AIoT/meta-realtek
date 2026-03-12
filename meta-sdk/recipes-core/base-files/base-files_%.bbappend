@@ -20,7 +20,13 @@ do_install:append:rtl8730eah-va6() {
     install -m 0755 ${WORKDIR}/usb.sh ${D}${base_bindir}/usb.sh
 }
 
-do_install:append:rtl8730elh-va7() {
+do_install:append:rtl8730eam-va6() {
+    echo "/dev/mtdblock8          /mnt              jffs2      defaults              0  0" >> ${D}${sysconfdir}/fstab
+    install -m 0644 ${WORKDIR}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
+    install -m 0755 ${WORKDIR}/usb.sh ${D}${base_bindir}/usb.sh
+}
+
+do_install:append:rtl8730elm-va7() {
     echo "/dev/ubi1_0          /mnt                 ubifs      defaults              0  0" >> ${D}${sysconfdir}/fstab
     install -m 0644 ${WORKDIR}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
     install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/fw_env.config
@@ -31,7 +37,7 @@ do_install:append:rtl8730elh-va7() {
     install -m 0755 ${WORKDIR}/postupdate.sh ${D}${bindir}/postupdate.sh
 }
 
-do_install:append:rtl8730elh-va8() {
+do_install:append:rtl8730elm-va8() {
     echo "/dev/ubi1_0          /mnt                 ubifs      defaults              0  0" >> ${D}${sysconfdir}/fstab
     install -m 0644 ${WORKDIR}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
     install -m 0644 ${WORKDIR}/fw_env.config ${D}${sysconfdir}/fw_env.config
@@ -42,7 +48,7 @@ do_install:append:rtl8730elh-va8() {
     install -m 0755 ${WORKDIR}/postupdate.sh ${D}${bindir}/postupdate.sh
 }
 
-do_install:rtl8730elh-recovery() {
+do_install:rtl8730e-recovery() {
     install -d ${D}${sysconfdir}
     install -d ${D}${base_bindir}
     install -d ${D}${sysconfdir}/mdev

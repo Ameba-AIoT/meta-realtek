@@ -105,10 +105,10 @@ OPTIONS
         non-default path of SSTATE_DIR (shared state Cache)
 
 EXAMPLE
-    $ source envsetup.sh -m rtl8730elh-va8 -d ameba-generic -b out
+    $ source envsetup.sh -m rtl8730elm-va8 -d ameba-generic -b out
 
     The script creates the build directory - out, configures it for the
-    specified MACHINE:rtl8730elh-va8 and DISTRO:ameba-generic, and prepares
+    specified MACHINE:rtl8730elm-va8 and DISTRO:ameba-generic, and prepares
     the calling shell for running bitbake on the build directory.
 
 OTHERS
@@ -231,7 +231,7 @@ function m()
 
     cp -f ${deploy_dir}/uImage ${deploy_dir}/kernel.img
 
-    if [ "${TARGET_MACHINE}" = "rtl8730eah-va6" ]; then
+    if [[ "${TARGET_MACHINE}" = "rtl8730eah-va6" || "${TARGET_MACHINE}" = "rtl8730eam-va6" ]]; then
         cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.squashfs ${deploy_dir}/rootfs.img
         cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.jffs2 ${deploy_dir}/userdata.img
     else
@@ -353,7 +353,7 @@ function mrecovery()
     fi
 
     local deploy_dir=${BUILDDIR}/tmp/deploy/images/${TARGET_MACHINE}
-    cp ${deploy_dir}/uImage-initramfs-rtl8730elh-recovery.bin ${deploy_dir}/kernel_recovery.img
+    cp ${deploy_dir}/uImage-initramfs-rtl8730e-recovery.bin ${deploy_dir}/kernel_recovery.img
 }
 
 function get_build_config()
@@ -444,7 +444,7 @@ function lunch()
 
     if [ -z "$answer" ]
     then
-        selection=rtl8730elh-va8-generic
+        selection=rtl8730elm-va8-generic
     elif (echo -n $answer | grep -q -e "^[0-9][0-9]*$")
     then
         if [ $answer -le ${#LUNCH_MENU_CHOICES[@]} ]

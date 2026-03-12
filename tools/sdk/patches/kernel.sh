@@ -19,5 +19,5 @@ sed -i '/inic/d' $SDK_DIR/sources/kernel/linux-5.4/drivers/rtkdrivers/Makefile
 echo "remove $SDK_DIR/sources/kernel/linux-5.4/drivers/rtkdrivers/net/wireless/fullmac.readme"
 rm -rf $SDK_DIR/sources/kernel/linux-5.4/drivers/rtkdrivers/net/wireless/fullmac.readme
 
-echo "remove $SDK_DIR/sources/kernel/linux-5.4/arch/arm/boot/dts/rtl8730elh-va7-ranging.dts"
-rm -rf $SDK_DIR/sources/kernel/linux-5.4/arch/arm/boot/dts/rtl8730elh-va7-ranging.dts
+echo "remove $SDK_DIR/sources/kernel/linux-5.4/arch/arm/boot/dts/rtl8730elm-va7-ranging.dts"
+rm -rf $SDK_DIR/sources/kernel/linux-5.4/arch/arm/boot/dts/rtl8730elm-va7-ranging.dts
