@@ -9,7 +9,7 @@ SRC_URI:prepend = " \
 
 do_configure () {
         ${MAKE} -C wpa_supplicant clean
-        sed -e '/^CONFIG_TLS=/d' <${WORKDIR}/defconfig >wpa_supplicant/.config
+        sed -e '/^CONFIG_TLS=/d' <${UNPACKDIR}/defconfig >wpa_supplicant/.config
 
         if ${@ bb.utils.contains('PACKAGECONFIG', 'openssl', 'true', 'false', d) }; then
                 echo 'CONFIG_TLS=openssl' >>wpa_supplicant/.config

@@ -1,8 +1,18 @@
-Upstream-Status: Pending
+From 6cc7afbc96af0073a3b88d7110b3a72804c67b79 Mon Sep 17 00:00:00 2001
+From: Jacob Shen <qi_shen@realsil.com.cn>
+Date: Sun, 13 Oct 2024 19:43:56 +0800
+Subject: [PATCH] add amebasmart yocto support
 
+Upstream-Status: Pending
+---
+ src/pcm/pcm_dmix.c | 78 +++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 77 insertions(+), 1 deletion(-)
+
+diff --git a/src/pcm/pcm_dmix.c b/src/pcm/pcm_dmix.c
+index 55cae3e..32bbd5c 100644
 --- a/src/pcm/pcm_dmix.c
 +++ b/src/pcm/pcm_dmix.c
-@@ -161,7 +161,10 @@ static void mix_areas(snd_pcm_direct_t *dmix,
+@@ -162,7 +162,10 @@ static void mix_areas(snd_pcm_direct_t *dmix,
  	unsigned int src_step, dst_step;
  	unsigned int chn, dchn, channels, sample_size;
  	mix_areas_t *do_mix_areas;
@@ -14,7 +24,7 @@ Upstream-Status: Pending
  	channels = dmix->channels;
  	switch (dmix->shmptr->s.format) {
  	case SND_PCM_FORMAT_S16_LE:
-@@ -187,13 +190,23 @@ static void mix_areas(snd_pcm_direct_t *dmix,
+@@ -188,13 +191,23 @@ static void mix_areas(snd_pcm_direct_t *dmix,
  		do_mix_areas = (mix_areas_t *)dmix->u.dmix.mix_areas_u8;
  		break;
  	default:
@@ -38,7 +48,7 @@ Upstream-Status: Pending
  		do_mix_areas(size * channels,
  			     (unsigned char *)dst_areas[0].addr + sample_size * dst_ofs * channels,
  			     (unsigned char *)src_areas[0].addr + sample_size * src_ofs * channels,
-@@ -201,8 +214,71 @@ static void mix_areas(snd_pcm_direct_t *dmix,
+@@ -202,8 +215,71 @@ static void mix_areas(snd_pcm_direct_t *dmix,
  			     sample_size,
  			     sample_size,
  			     sizeof(signed int));

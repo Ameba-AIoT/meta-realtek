@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/nan_vendor_wrapper ${D}${base_bindir}
-    install -m 755 ${WORKDIR}/nan_test ${D}/bin
+    install -m 755 ${UNPACKDIR}/nan_test ${D}/bin
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

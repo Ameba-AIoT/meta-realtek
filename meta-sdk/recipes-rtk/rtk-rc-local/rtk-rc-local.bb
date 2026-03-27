@@ -6,7 +6,8 @@ SRC_URI = " \
     file://rc.local \
 "
 
-S = "${WORKDIR}"
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
 
 inherit update-rc.d
 

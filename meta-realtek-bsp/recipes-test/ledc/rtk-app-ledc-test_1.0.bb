@@ -9,7 +9,7 @@ SRC_URI = "file://rtk_ledc_test.sh"
 
 do_install () {
     install -d ${D}/bin
-    install -m 755 ${WORKDIR}/rtk_ledc_test.sh ${D}/bin/
+    install -m 755 ${UNPACKDIR}/rtk_ledc_test.sh ${D}/bin/
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

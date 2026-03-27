@@ -12,7 +12,7 @@ SRC_URI = "file://rtk_cpu_test.sh"
 
 do_install () {
     install -d ${D}${base_bindir}
-    install -m 755 ${WORKDIR}/rtk_cpu_test.sh ${D}/bin
+    install -m 755 ${UNPACKDIR}/rtk_cpu_test.sh ${D}/bin
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

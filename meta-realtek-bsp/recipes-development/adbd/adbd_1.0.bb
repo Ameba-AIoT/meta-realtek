@@ -6,6 +6,8 @@ LICENSE = "CLOSED"
 
 inherit externalsrc
 
+DEPENDS += "libcap"
+
 EXTERNALSRC = "${RTKDIR}/development/adb"
 
 CFLAGS +=" --sysroot=${STAGING_DIR_HOST}"

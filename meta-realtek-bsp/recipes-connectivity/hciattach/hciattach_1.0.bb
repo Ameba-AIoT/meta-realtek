@@ -28,7 +28,7 @@ do_install () {
     install -d ${D}${sysconfdir}/init.d
     install -d ${D}/lib/firmware/rtlbt
     install ${B}/rtk_hciattach ${D}${bindir}
-    install -m 0755 ${WORKDIR}/init ${D}${sysconfdir}/init.d/rtk_hciattach
+    install -m 0755 ${UNPACKDIR}/init ${D}${sysconfdir}/init.d/rtk_hciattach
     install -m 644 ${RTKDIR}/development/bluetooth/bt_fw/rtl8730_fw ${D}/lib/firmware/rtlbt/
     install -m 644 ${RTKDIR}/development/bluetooth/bt_fw/rtl8730_mp_fw ${D}/lib/firmware/rtlbt/
     install -m 644 ${RTKDIR}/development/bluetooth/bt_fw/rtl8730_config_s0 ${D}/lib/firmware/rtlbt/

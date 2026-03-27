@@ -1,10 +1,20 @@
-Upstream-Status: Pending
+From 838c25314d10186fcea2f791e346bbb43250e79e Mon Sep 17 00:00:00 2001
+From: Jacob Shen <qi_shen@realsil.com.cn>
+Date: Sun, 13 Oct 2024 19:43:56 +0800
+Subject: [PATCH] add amebasmart yocto support
 
+Upstream-Status: Pending
+---
+ test/Makefile.am | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/test/Makefile.am b/test/Makefile.am
+index 707063c..98809e9 100644
 --- a/test/Makefile.am
 +++ b/test/Makefile.am
 @@ -3,7 +3,9 @@ SUBDIRS=. lsb
- check_PROGRAMS=control pcm pcm_min latency seq \
- 	       playmidi1 timer rawmidi midiloop \
+ check_PROGRAMS=control pcm pcm_min latency seq seq-ump-example \
+ 	       playmidi1 timer rawmidi midiloop umpinfo \
  	       oldapi queue_timer namehint client_event_filter \
 -	       chmap audio_time user-ctl-element-set pcm-multi-thread
 +	       chmap user-ctl-element-set pcm-multi-thread

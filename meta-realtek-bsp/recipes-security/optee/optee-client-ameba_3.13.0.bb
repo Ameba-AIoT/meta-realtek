@@ -4,7 +4,6 @@ HOMEPAGE = ""
 LICENSE = "BSD-2-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=69663ab153298557a59c67a60a743e5b"
 
-inherit autotools
 inherit externalsrc
 
 OPTEE_ARCH:arm = "arm32"

@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/rtk_gpio_sysfs_test ${D}${base_bindir}
-    install -m 755 ${WORKDIR}/rtk_gpio_sysfs_test.sh ${D}${base_bindir}
+    install -m 755 ${UNPACKDIR}/rtk_gpio_sysfs_test.sh ${D}${base_bindir}
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

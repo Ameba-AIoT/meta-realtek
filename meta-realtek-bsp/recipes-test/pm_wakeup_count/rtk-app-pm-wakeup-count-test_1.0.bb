@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/rtk_pm_wakeup_count_test ${D}${base_bindir}
-    install ${WORKDIR}/rtk_pm_wakeup_test.sh ${D}${base_bindir}
+    install ${UNPACKDIR}/rtk_pm_wakeup_test.sh ${D}${base_bindir}
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

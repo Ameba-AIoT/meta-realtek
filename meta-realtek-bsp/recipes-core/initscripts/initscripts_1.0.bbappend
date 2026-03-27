@@ -7,7 +7,7 @@ SRC_URI:preappend = " \
 SRC_URI += "file://overlay.sh"
 
 do_install:append() {
-    install -m 0755 ${WORKDIR}/overlay.sh ${D}${sysconfdir}/init.d
+    install -m 0755 ${S}/overlay.sh ${D}${sysconfdir}/init.d
 }
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

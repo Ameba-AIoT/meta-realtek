@@ -1,5 +1,7 @@
 REQUIRED_DISTRO_FEATURES = ""
 
+inherit features_check
+
 do_configure:prepend() {
     [ -r "${S}/lv_conf.h" ] \
         || sed -e 's|#if 0 .*Set it to "1" to enable .*|#if 1 // Enabled|g' \

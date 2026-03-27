@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/rtk_sdioh_test ${D}${base_bindir}
-    install -m 755 ${WORKDIR}/rtk_sdioh_test.sh ${D}${base_bindir}
+    install -m 755 ${UNPACKDIR}/rtk_sdioh_test.sh ${D}${base_bindir}
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

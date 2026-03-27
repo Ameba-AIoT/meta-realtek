@@ -6,7 +6,6 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 
 #FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-inherit autotools
 inherit externalsrc
 
 OPTEE_ARCH:arm = "arm32"

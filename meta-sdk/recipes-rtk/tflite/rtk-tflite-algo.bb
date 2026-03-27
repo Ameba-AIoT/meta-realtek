@@ -2,7 +2,7 @@ SUMMARY = "TfLite APP for Realtek Ameba"
 DESCRIPTION = "TfLite APP for Realtek Ameba"
 SECTION = "test"
 HOMEPAGE = ""
-LICENSE = "Apache License 2.0"
+LICENSE = "Apache-2.0"
 
 inherit externalsrc
 

@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/rtk_adc_test ${D}${base_bindir}
-    install -m 755 ${WORKDIR}/rtk_adc_test.sh ${D}/bin
+    install -m 755 ${UNPACKDIR}/rtk_adc_test.sh ${D}/bin
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"

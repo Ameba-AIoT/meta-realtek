@@ -26,7 +26,7 @@ do_compile() {
 do_install () {
     install -d ${D}${base_bindir}
     install ${B}/rtk_rtc_test ${D}${base_bindir}
-    install ${WORKDIR}/rtk_rtc_test.sh ${D}${base_bindir}
+    install ${UNPACKDIR}/rtk_rtc_test.sh ${D}${base_bindir}
 }
 
 INSANE_SKIP:${PN} += "file-rdeps"
