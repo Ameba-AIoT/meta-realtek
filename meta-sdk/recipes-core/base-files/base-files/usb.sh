@@ -64,6 +64,7 @@ function insmod_otg_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
 }
 
@@ -74,6 +75,7 @@ function insmod_usbh_msc_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/core/usbcore.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
     status="usbh_msc_ko"
     echo $status > $STATUS_FILE
@@ -81,6 +83,7 @@ function insmod_usbh_msc_ko()
 
 function rmmod_usbh_msc_ko()
 {
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/udc/udc-core.ko 2>/dev/null
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/storage/usb-storage.ko
@@ -101,6 +104,7 @@ function insmod_usbd_adb_ko()
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/libcomposite.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
+    insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     insmod_ko /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
     status="usbd_adb_ko"
     echo $status > $STATUS_FILE
@@ -108,6 +112,7 @@ function insmod_usbd_adb_ko()
 
 function rmmod_usbd_adb_ko()
 {
+    rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/roles/roles.ko
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/dwc2/dwc2.ko
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_hid.ko
     rmmod /lib/modules/$KERNEL_VERSION/kernel/drivers/usb/gadget/function/usb_f_accessory.ko 2>/dev/null
