@@ -1,8 +1,9 @@
+Upstream-Status: Pending
 diff --git a/core/stream_interface.c b/core/stream_interface.c
-index f5cba496..01e221c6 100644
+index 85d13fda..640df89a 100644
 --- a/core/stream_interface.c
 +++ b/core/stream_interface.c
-@@ -644,6 +644,13 @@ void *network_initializer(void *data)
+@@ -673,6 +673,13 @@ void *network_initializer(void *data)
  				ERROR("%s cannot be opened", software->output);
  				ret = -ENODEV;
  			}
@@ -16,7 +17,7 @@ index f5cba496..01e221c6 100644
  		}
  
  		if (!ret) {
-@@ -767,6 +774,7 @@ void *network_initializer(void *data)
+@@ -801,6 +808,7 @@ void *network_initializer(void *data)
  		swupdate_remove_directory(DATADST_DIR_SUFFIX);
  #endif
  
@@ -25,10 +26,10 @@ index f5cba496..01e221c6 100644
  		 * Last step, if no restart is required,
  		 * SWUpdate can send automatically the feedback.
 diff --git a/core/swupdate.c b/core/swupdate.c
-index e7ec5694..9c454459 100644
+index be027dcb..76e8dff6 100644
 --- a/core/swupdate.c
 +++ b/core/swupdate.c
-@@ -112,6 +112,7 @@ static struct option long_options[] = {
+@@ -122,6 +122,7 @@ static struct option long_options[] = {
  	{"no-state-marker", no_argument, NULL, 'm'},
  	{"no-transaction-marker", no_argument, NULL, 'M'},
  	{"output", required_argument, NULL, 'o'},
@@ -36,7 +37,7 @@ index e7ec5694..9c454459 100644
  	{"gen-swversions", required_argument, NULL, 's'},
  	{"preupdate", required_argument, NULL, 'P'},
  	{"postupdate", required_argument, NULL, 'p'},
-@@ -176,6 +177,7 @@ static void usage(char *programname)
+@@ -194,6 +195,7 @@ static void usage(char *programname)
  		" -M, --no-transaction-marker    : disable setting bootloader transaction marker\n"
  		" -m, --no-state-marker          : disable setting update state in bootloader\n"
  		" -o, --output <filename>        : saves the incoming stream\n"
@@ -44,7 +45,7 @@ index e7ec5694..9c454459 100644
  		" -s, --gen-swversions <filename>: generate sw-versions file after successful installation\n"
  		" -v, --verbose                  : be verbose, set maximum loglevel\n"
  		"     --version                  : print SWUpdate version and exit\n"
-@@ -482,7 +484,7 @@ int main(int argc, char **argv)
+@@ -606,7 +608,7 @@ int main(int argc, char **argv)
  #endif
  	memset(main_options, 0, sizeof(main_options));
  	memset(image_url, 0, sizeof(image_url));
@@ -53,7 +54,7 @@ index e7ec5694..9c454459 100644
  #ifdef CONFIG_MTD
  	strcat(main_options, "b:");
  #endif
-@@ -663,6 +665,9 @@ int main(int argc, char **argv)
+@@ -797,6 +799,9 @@ int main(int argc, char **argv)
  		case 'L':
  			swcfg.syslog_enabled = true;
  			break;
@@ -61,22 +62,22 @@ index e7ec5694..9c454459 100644
 +			swcfg.download_only = true;
 +			break;
  		case 'k':
- 			strlcpy(swcfg.publickeyfname,
+ 			if (optarg) strlcpy(swcfg.publickeyfname,
  				optarg,
 diff --git a/include/swupdate.h b/include/swupdate.h
-index a36ffb87..ea7a75d8 100644
+index 59b085b6..56dffc4b 100644
 --- a/include/swupdate.h
 +++ b/include/swupdate.h
-@@ -61,6 +61,7 @@ struct swupdate_cfg {
+@@ -88,6 +88,7 @@ struct swupdate_cfg {
  	char forced_signer_name[SWUPDATE_GENERAL_STRING_SIZE];
  	char namespace_for_vars[SWUPDATE_GENERAL_STRING_SIZE];
  	void *lua_state;
 +	bool download_only;
  	bool syslog_enabled;
- 	bool no_downgrading;
- 	bool no_reinstalling;
+ 	bool verbose;
+ 	int loglevel;
 diff --git a/suricatta/server_hawkbit.c b/suricatta/server_hawkbit.c
-index 342670cd..96275f9b 100644
+index 519638c1..016274d4 100644
 --- a/suricatta/server_hawkbit.c
 +++ b/suricatta/server_hawkbit.c
 @@ -902,6 +902,13 @@ server_op_res_t server_handle_initial_state(update_state_t stateovrrd)
@@ -101,11 +102,12 @@ index 342670cd..96275f9b 100644
  		if (server_send_deployment_reply(
  			server_hawkbit.channel,
  			action_id, json_data_chunk_max,
-@@ -1530,6 +1538,15 @@ cleanup:
+@@ -1530,6 +1538,16 @@ cleanup:
  			result = msg.type == ACK ? SERVER_OK : SERVER_EERR;
  			DEBUG("%s", msg.data.msg);
  		}
 +
++		const char *details = "Skipped Update.";
 +		if (server_send_deployment_reply(
 +			server_hawkbit.channel,
 +			action_id, 0, 0, reply_status_result_finished.success,
