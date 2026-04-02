@@ -3,7 +3,7 @@ UNPACKDIR = "${S}"
 
 do_install:rtl8730e-recovery() {
     install -d ${D}${sysconfdir}
-    install -D -m 0644 ${WORKDIR}/inittab ${D}${sysconfdir}/inittab
+    install -D -m 0644 ${UNPACKDIR}/inittab ${D}${sysconfdir}/inittab
 
     echo "console::respawn:-/bin/sh" >> ${D}${sysconfdir}/inittab
     echo "#tty2::askfirst:-/bin/sh" >> ${D}${sysconfdir}/inittab

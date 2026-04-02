@@ -7,5 +7,5 @@ SRC_URI:prepend = " \
 "
 
 do_install:append() {
-    install -m 0644 ${WORKDIR}/11-swupdate-boot-args ${D}${libdir}/swupdate/conf.d/
+    install -m 0644 ${UNPACKDIR}/11-swupdate-boot-args ${D}${libdir}/swupdate/conf.d/
 }
