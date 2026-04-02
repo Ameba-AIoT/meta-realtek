@@ -54,6 +54,7 @@ do_install:rtl8730e-recovery() {
     install -d ${D}${sysconfdir}/mdev
     install -m 0644 ${S}/fw_env.config ${D}${sysconfdir}/fw_env.config
     install -m 0644 ${S}/hwrevision ${D}${sysconfdir}/hwrevision
+    install -m 0644 ${S}/swupdate.cfg ${D}${sysconfdir}/swupdate.cfg
     install -m 0644 ${S}/swupdate-public.pem ${D}${sysconfdir}/swupdate-public.pem
     install -m 0755 ${S}/recovery.sh ${D}${base_bindir}/recovery.sh
     install -m 0755 ${S}/mdev.conf ${D}${sysconfdir}/mdev.conf

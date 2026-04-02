@@ -10,6 +10,7 @@ EXTERNALSRC = "${RTKDIR}/kernel/linux-6.18"
 S = "${EXTERNALSRC}"
 
 KBUILD_DEFCONFIG:rtl8730eah-va6 ?= "rtl8730e_defconfig"
+KBUILD_DEFCONFIG:rtl8730eam-va6 ?= "rtl8730e_defconfig"
 KBUILD_DEFCONFIG:rtl8730elm-va7 ?= "rtl8730e_defconfig"
 KBUILD_DEFCONFIG:rtl8730elm-va8 ?= "rtl8730e_defconfig"
 KBUILD_DEFCONFIG:rtl8730e-recovery ?= "rtl8730e_recovery_defconfig"

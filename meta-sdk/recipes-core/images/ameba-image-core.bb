@@ -57,7 +57,6 @@ remove_unneeded_files() {
     rm -rf ${IMAGE_ROOTFS}/usr/src
     rm -rf ${IMAGE_ROOTFS}/usr/include
     rm -rf ${IMAGE_ROOTFS}/usr/share/mime
-    rm -rf ${IMAGE_ROOTFS}/usr/share/alsa
     rm -rf ${IMAGE_ROOTFS}/usr/share/locale
     rm -rf ${IMAGE_ROOTFS}/usr/share/sounds
     rm -rf ${IMAGE_ROOTFS}/usr/lib/opkg

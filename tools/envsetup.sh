@@ -232,7 +232,7 @@ function m()
     cp -f ${deploy_dir}/uImage ${deploy_dir}/kernel.img
 
     if [[ "${TARGET_MACHINE}" = "rtl8730eah-va6" || "${TARGET_MACHINE}" = "rtl8730eam-va6" ]]; then
-        cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.squashfs ${deploy_dir}/rootfs.img
+        cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.squashfs-xz ${deploy_dir}/rootfs.img
         cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.jffs2 ${deploy_dir}/userdata.img
     else
         cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.ubi ${deploy_dir}/rootfs.img

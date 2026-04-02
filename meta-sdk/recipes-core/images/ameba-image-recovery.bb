@@ -9,6 +9,7 @@ IMAGE_LINGUAS = ""
 
 IMAGE_INSTALL += " \
     recovery \
+    base-files \
     kernel-modules \
     wpa-supplicant \
     dhcpcd \
