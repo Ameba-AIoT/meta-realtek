@@ -240,7 +240,7 @@ if [ -z "$DTB_IMAGE" ]; then
 fi
 
 if [ -z "$BOOT_IMAGE" ]; then
-    DEFAULT_BOOT_IMAGE="boot.img"
+    DEFAULT_BOOT_IMAGE="fip.img"
     BOOT_IMAGE=$INPUT_DIR$SLASH_CHAR$DEFAULT_BOOT_IMAGE
     #echo "Use kernel image: $BOOT_IMAGE"
 fi
@@ -260,7 +260,7 @@ if [ -z "$ROOTFS_IMAGE" ]; then
 fi
 
 if [ -z "$KM4_BOOT_IMAGE" ]; then
-    DEFAULT_KM4_BOOT_IMAGE="km4_boot_all.bin"
+    DEFAULT_KM4_BOOT_IMAGE="boot.bin"
     KM4_BOOT_IMAGE=$INPUT_DIR$SLASH_CHAR$DEFAULT_KM4_BOOT_IMAGE
     if [ ! -f $KM4_BOOT_IMAGE ]; then
         echo "File '$KM4_BOOT_IMAGE' does not exist!! Please mfw first."
@@ -270,7 +270,7 @@ if [ -z "$KM4_BOOT_IMAGE" ]; then
 fi
 
 if [ -z "$KM4_APP_IMAGE" ]; then
-    DEFAULT_KM4_APP_IMAGE="km0_km4_app.bin"
+    DEFAULT_KM4_APP_IMAGE="app.bin"
     KM4_APP_IMAGE=$INPUT_DIR$SLASH_CHAR$DEFAULT_KM4_APP_IMAGE
     if [ ! -f $KM4_APP_IMAGE ]; then
         echo "File '$KM4_APP_IMAGE' does not exist!! Please mfw first."
@@ -460,22 +460,22 @@ function make_secure_firmware()
     # 1. make secure km4 boot image
 
     # cut the original manifest head to remake it
-    tail -c +4097 $KM4_BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin
+    tail -c +4097 $KM4_BOOT_IMAGE > $OUTPUT_DIR/secure-auxiliary/boot.bin
 
-    python3 $AXF2BIN  --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin
+    python3 $AXF2BIN  --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/boot.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin
 
     cat $OUTPUT_DIR/secure-auxiliary/manifest_km4boot.bin \
-        $OUTPUT_DIR/secure-auxiliary/km4_boot_all.bin \
-        > $OUTPUT_DIR/km4_boot_all.bin
+        $OUTPUT_DIR/secure-auxiliary/boot.bin \
+        > $OUTPUT_DIR/boot.bin
 
-    echo_info "=> Install: $OUTPUT_DIR/km4_boot_all.bin"
+    echo_info "=> Install: $OUTPUT_DIR/boot.bin"
 
     # 2. make secure km4 app image
 
     # cut the original manifest and cert head to remake it
-    tail -c +8193 $KM4_APP_IMAGE > $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin
+    tail -c +8193 $KM4_APP_IMAGE > $OUTPUT_DIR/secure-auxiliary/app.bin
 
-    python3 $AXF2BIN --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin
+    python3 $AXF2BIN --extern-dir $KEY_DIR encrypt manifest -i $OUTPUT_DIR/secure-auxiliary/app.bin -o $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin
 
     python3 $AXF2BIN --extern-dir $KEY_DIR encrypt cert -o $OUTPUT_DIR/secure-auxiliary/cert.bin --entry-pairs \
     	0 image2   \
@@ -484,10 +484,10 @@ function make_secure_firmware()
 
     cat $OUTPUT_DIR/secure-auxiliary/cert.bin \
         $OUTPUT_DIR/secure-auxiliary/manifest_km4app.bin \
-        $OUTPUT_DIR/secure-auxiliary/km0_km4_app.bin \
-        > $OUTPUT_DIR/km0_km4_app.bin
+        $OUTPUT_DIR/secure-auxiliary/app.bin \
+        > $OUTPUT_DIR/app.bin
 
-    echo_info "=> Install: $OUTPUT_DIR/km0_km4_app.bin"
+    echo_info "=> Install: $OUTPUT_DIR/app.bin"
 
     # 3. make secure linux boot image
 
@@ -498,9 +498,9 @@ function make_secure_firmware()
 
     cat $OUTPUT_DIR/secure-auxiliary/manifest_boot.bin \
         $OUTPUT_DIR/secure-auxiliary/ap_image_all.img \
-        > $OUTPUT_DIR/boot.img
+        > $OUTPUT_DIR/fip.img
 
-    echo_info "=> Install: $OUTPUT_DIR/boot.img"
+    echo_info "=> Install: $OUTPUT_DIR/fip.img"
 
     # 3. make secure imagetool flashloader
     if [ ! -f $IMGTOOL_FLASHLODER_IMG ]; then

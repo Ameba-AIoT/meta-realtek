@@ -46,17 +46,17 @@ do_compile() {
 }
 
 do_install () {
-    cp -rf ${FIRMWARE_OUT}/km0_km4_app.bin ${D}
-    cp -rf ${FIRMWARE_OUT}/km4_boot_all.bin ${D}
+    cp -rf ${FIRMWARE_OUT}/app.bin ${D}
+    cp -rf ${FIRMWARE_OUT}/boot.bin ${D}
     cp -rf ${FIRMWARE_OUT}/km0_image2_all_origin.bin ${D}/km0_image2_all_origin.bin
-    cp -rf ${FIRMWARE_OUT}/km4_boot_all_origin.bin ${D}/km4_boot_all_origin.bin
+    cp -rf ${FIRMWARE_OUT}/boot_origin.bin ${D}/boot_origin.bin
     cp -rf ${FIRMWARE_OUT}/km4_image2_all_origin.bin ${D}/km4_image2_all_origin.bin
 }
 
 do_deploy() {
     install -d ${DEPLOY_DIR_IMAGE}/
-    cp -fr ${D}/km4_boot_all.bin ${DEPLOY_DIR_IMAGE}/
-    cp -fr ${D}/km0_km4_app.bin ${DEPLOY_DIR_IMAGE}/
+    cp -fr ${D}/boot.bin ${DEPLOY_DIR_IMAGE}/
+    cp -fr ${D}/app.bin ${DEPLOY_DIR_IMAGE}/
 }
 addtask deploy after do_install
 

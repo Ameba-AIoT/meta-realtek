@@ -70,17 +70,17 @@ do_compile() {
 
     # use the default manifest and key to create boot image
     python3 ${AXF2BIN} --extern-dir ${DEFAULT_KEY_DIR} encrypt manifest -i ap_image_all.img -o manifest.bin
-    cat manifest.bin ap_image_all.img > boot.img
+    cat manifest.bin ap_image_all.img > fip.img
 }
 
 do_install() {
     install -d ${D}/boot
-    install -m 644 ${B}/build/amebasmart/debug/boot.img ${D}/boot/boot.img
+    install -m 644 ${B}/build/amebasmart/debug/fip.img ${D}/boot/fip.img
     install -m 644 ${B}/build/amebasmart/debug/ap_image_all.img ${D}/boot/boot_orig.img
 }
 
 do_deploy() {
-    cp -fr ${D}/boot/boot.img ${DEPLOY_DIR_IMAGE}/
+    cp -fr ${D}/boot/fip.img ${DEPLOY_DIR_IMAGE}/
 }
 addtask deploy after do_install
 

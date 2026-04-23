@@ -12,7 +12,7 @@ cp $SCRIPT_PATH/pre_install.sh pre_install.sh
 cp $SCRIPT_PATH/post_install.sh post_install.sh
 cp $SCRIPT_PATH/sw-description-template sw-description
 
-IMAGES="km4_boot_all.bin km0_km4_app.bin boot.img dtb.img kernel.img rootfs.img pre_install.sh post_install.sh"
+IMAGES="boot.bin app.bin fip.img dtb.img kernel.img rootfs.img pre_install.sh post_install.sh"
 MY_FILES="sw-description sw-description.sig $IMAGES"
 
 #cp sw-description-template sw-description

@@ -4,40 +4,40 @@ software =
     hardware-compatibility: [ "v2.2"];
     images: (
         {
-            filename = "km4_boot_all.bin";
+            filename = "boot.bin";
             version = "2";
             device = "/dev/mtd6";
-            sha256 = "@km4_boot_all.bin";
+            sha256 = "@boot.bin";
         },
         {
-            filename = "km0_km4_app.bin";
+            filename = "app.bin";
             version = "2";
             device = "/dev/mtd7";
-            sha256 = "@km0_km4_app.bin";
+            sha256 = "@app.bin";
         },
         {
-            filename = "boot.img";
+            filename = "fip.img";
             version = "2";
             device = "/dev/mtd8";
-            sha256 = "@boot.img";
+            sha256 = "@fip.img";
         },
         {
-            filename = "km4_boot_all.bin";
+            filename = "boot.bin";
             version = "2";
             device = "/dev/mtd9";
-            sha256 = "@km4_boot_all.bin";
+            sha256 = "@boot.bin";
         },
         {
-            filename = "km0_km4_app.bin";
+            filename = "app.bin";
             version = "2";
             device = "/dev/mtd10";
-            sha256 = "@km0_km4_app.bin";
+            sha256 = "@app.bin";
         },
         {
-            filename = "boot.img";
+            filename = "fip.img";
             version = "2";
             device = "/dev/mtd11";
-            sha256 = "@boot.img";
+            sha256 = "@fip.img";
         },
         {
             filename = "dtb.img";
