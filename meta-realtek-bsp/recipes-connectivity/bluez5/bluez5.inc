@@ -7,11 +7,8 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
                     file://COPYING.LIB;md5=fb504b67c50331fc78734fed90fb0e09 \
                     file://src/main.c;beginline=1;endline=24;md5=0ad83ca0dc37ab08af448777c581e7ac"
 DEPENDS = "dbus glib-2.0"
-RDEPENDS:${PN} += "dbus"
 PROVIDES += "bluez-hcidump"
 RPROVIDES:${PN} += "bluez-hcidump"
-
-RCONFLICTS:${PN} = "bluez4"
 
 PACKAGECONFIG ??= "obex-profiles \
     readline \
@@ -25,6 +22,9 @@ PACKAGECONFIG ??= "obex-profiles \
     vcp-profiles \
     micp-profiles \
     csip-profiles \
+    tmap-profiles \
+    gmap-profiles \
+    hfp-profiles \
     asha-profiles \
     network-profiles \
     hid-profiles \
@@ -40,13 +40,11 @@ PACKAGECONFIG[midi] = "--enable-midi,--disable-midi,alsa-lib"
 PACKAGECONFIG[systemd] = "--enable-systemd,--disable-systemd"
 PACKAGECONFIG[cups] = "--enable-cups,--disable-cups,,cups"
 PACKAGECONFIG[nfc] = "--enable-nfc,--disable-nfc"
-PACKAGECONFIG[sap-profiles] = "--enable-sap,--disable-sap"
 PACKAGECONFIG[a2dp-profiles] = "--enable-a2dp,--disable-a2dp"
 PACKAGECONFIG[avrcp-profiles] = "--enable-avrcp,--disable-avrcp"
 PACKAGECONFIG[network-profiles] = "--enable-network,--disable-network"
 PACKAGECONFIG[hid-profiles] = "--enable-hid,--disable-hid"
 PACKAGECONFIG[hog-profiles] = "--enable-hog,--disable-hog"
-PACKAGECONFIG[health-profiles] = "--enable-health,--disable-health"
 PACKAGECONFIG[bap-profiles] = "--enable-bap,--disable-bap"
 PACKAGECONFIG[bass-profiles] = "--enable-bass,--disable-bass"
 PACKAGECONFIG[mcp-profiles] = "--enable-mcp,--disable-mcp"
@@ -54,10 +52,12 @@ PACKAGECONFIG[ccp-profiles] = "--enable-ccp,--disable-ccp"
 PACKAGECONFIG[vcp-profiles] = "--enable-vcp,--disable-vcp"
 PACKAGECONFIG[micp-profiles] = "--enable-micp,--disable-micp"
 PACKAGECONFIG[csip-profiles] = "--enable-csip,--disable-csip"
+PACKAGECONFIG[tmap-profiles] = "--enable-tmap,--disable-tmap"
+PACKAGECONFIG[gmap-profiles] = "--enable-gmap,--disable-gmap"
+PACKAGECONFIG[hfp-profiles] = "--enable-hfp,--disable-hfp"
 PACKAGECONFIG[asha-profiles] = "--enable-asha,--disable-asha"
 PACKAGECONFIG[sixaxis] = "--enable-sixaxis,--disable-sixaxis"
 PACKAGECONFIG[tools] = "--enable-tools,--disable-tools"
-PACKAGECONFIG[threads] = "--enable-threads,--disable-threads"
 PACKAGECONFIG[deprecated] = "--enable-deprecated,--disable-deprecated"
 PACKAGECONFIG[mesh] = "--enable-mesh --enable-external-ell,--disable-mesh, json-c ell"
 PACKAGECONFIG[btpclient] = "--enable-btpclient --enable-external-ell,--disable-btpclient, ell"
@@ -68,10 +68,11 @@ SRC_URI = "${KERNELORG_MIRROR}/linux/bluetooth/bluez-${PV}.tar.xz \
            file://init \
            file://run-ptest \
            file://0001-tests-add-a-target-for-building-tests-without-runnin.patch \
-           file://0001-media-fix-pac_config_cb-error-code-return.patch \
+           file://0001-Revert-shared-shell-Don-t-init-input-for-non-interac.patch \
+           file://0001-tools-Work-around-broken-stdin-handling-in-home-made.patch \
            file://mainconf.patch \
            "
-S = "${WORKDIR}/bluez-${PV}"
+S = "${UNPACKDIR}/bluez-${PV}"
 
 CVE_PRODUCT = "bluez"
 
@@ -85,7 +86,7 @@ EXTRA_OECONF = "\
   --without-zsh-completion-dir \
 "
 
-CFLAGS += "-DFIRMWARE_DIR=\\"${nonarch_base_libdir}/firmware\\""
+CFLAGS += "-DFIRMWARE_DIR='"${nonarch_base_libdir}/firmware"'"
 
 # bluez5 builds a large number of useful utilities but does not
 # install them.  Specify which ones we want put into ${PN}-noinst-tools.

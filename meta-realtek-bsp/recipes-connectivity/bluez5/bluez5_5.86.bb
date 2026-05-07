@@ -1,8 +1,14 @@
 require bluez5.inc
 
-SRC_URI[sha256sum] = "5ba73d030f7b00087d67800b0e321601aec0f892827c72e5a2c8390d8c886b11"
+LDFLAGS += " ${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-lld', '-Wl,-z,nostart-stop-gc', '', d)}"
+
+SRC_URI[sha256sum] = "99f144540c6070591e4c53bcb977eb42664c62b7b36cb35a29cf72ded339621d"
 
 CVE_STATUS[CVE-2020-24490] = "cpe-incorrect: This issue has kernel fixes rather than bluez fixes"
+CVE_STATUS[CVE-2020-12351] = "cpe-incorrect: This issue has kernel fixes rather than bluez fixes"
+CVE_STATUS[CVE-2020-12352] = "cpe-incorrect: This issue has kernel fixes rather than bluez fixes"
+
+ERROR_QA:remove = "patch-status"
 
 # noinst programs in Makefile.tools that are conditional on READLINE
 # support
@@ -35,6 +41,7 @@ NOINST_TOOLS_TESTING ?= " \
     tools/iso-tester \
     tools/mesh-tester \
     tools/ioctl-tester \
+    tools/6lowpan-tester \
 "
 
 # noinst programs in Makefile.tools that are conditional on TOOLS
@@ -53,7 +60,6 @@ NOINST_TOOLS_BT ?= " \
     tools/btproxy \
     tools/btiotest \
     tools/bneptest \
-    tools/mcaptest \
     tools/cltest \
     tools/oobtest \
     tools/advtest \
