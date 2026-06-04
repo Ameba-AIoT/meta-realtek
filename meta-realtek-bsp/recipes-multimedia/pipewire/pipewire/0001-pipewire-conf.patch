@@ -1,9 +1,17 @@
-Upstream-Status: Pending
+From ee759f40c0db4164f69589126f0126d6fb6cfabc Mon Sep 17 00:00:00 2001
+From: Jacob Shen <qi_shen@realsil.com.cn>
+Date: Sun, 13 Oct 2024 19:43:56 +0800
+Subject: [PATCH] add amebasmart yocto support
 
-diff --git a/pipewire.conf.in b/pipewire.conf.in
-index 14f7c6ea0..8979cc135 100644
---- a/pipewire.conf.in
-+++ b/pipewire.conf.in
+Upstream-Status: Pending
+---
+ src/daemon/pipewire.conf.in | 138 +++++++++++++++++++++++-------------
+ 1 file changed, 89 insertions(+), 49 deletions(-)
+
+diff --git a/src/daemon/pipewire.conf.in b/src/daemon/pipewire.conf.in
+index c3eb7120f..d96bea4a5 100644
+--- a/src/daemon/pipewire.conf.in
++++ b/src/daemon/pipewire.conf.in
 @@ -10,16 +10,16 @@
  
  context.properties = {
@@ -23,9 +31,9 @@ index 14f7c6ea0..8979cc135 100644
 -    #log.level                             = 2
 +    log.level                             = 2
      #cpu.zero.denormals                    = false
+     #rlimit.nofile                         = -1
  
-     #loop.rt-prio = -1            # -1 = use module-rt prio, 0 disable rt
-@@ -43,7 +43,7 @@ context.properties = {
+@@ -44,7 +44,7 @@ context.properties = {
      #default.clock.rate          = 48000
      #default.clock.allowed-rates = [ 48000 ]
      #default.clock.quantum       = 1024
@@ -34,7 +42,7 @@ index 14f7c6ea0..8979cc135 100644
      #default.clock.max-quantum   = 2048
      #default.clock.quantum-limit = 8192
      #default.clock.quantum-floor = 4
-@@ -75,7 +75,7 @@ context.spa-libs = {
+@@ -76,7 +76,7 @@ context.spa-libs = {
      # that factory.
      #
      audio.convert.* = audioconvert/libspa-audioconvert
@@ -43,7 +51,7 @@ index 14f7c6ea0..8979cc135 100644
      api.alsa.*      = alsa/libspa-alsa
      api.v4l2.*      = v4l2/libspa-v4l2
      api.libcamera.* = libcamera/libspa-libcamera
-@@ -111,7 +111,7 @@ context.modules = [
+@@ -112,7 +112,7 @@ context.modules = [
      { name = libpipewire-module-rt
          args = {
              nice.level    = -11
@@ -52,7 +60,7 @@ index 14f7c6ea0..8979cc135 100644
              #rt.time.soft = -1
              #rt.time.hard = -1
              #uclamp.min = 0
-@@ -183,14 +183,41 @@ context.modules = [
+@@ -184,14 +184,41 @@ context.modules = [
      # new clients.
      { name = libpipewire-module-access
          args = {
@@ -101,7 +109,7 @@ index 14f7c6ea0..8979cc135 100644
      }
  
      # Makes a factory for wrapping nodes in an adapter with a
-@@ -298,18 +325,52 @@ context.objects = [
+@@ -299,18 +326,52 @@ context.objects = [
          condition = [ { factory.freewheel-driver = !false } ]
      }
  
@@ -166,7 +174,7 @@ index 14f7c6ea0..8979cc135 100644
  
      # This creates a single PCM source device for the given
      # alsa device path hw:0. You can change source to sink
-@@ -345,27 +406,6 @@ context.objects = [
+@@ -346,27 +407,6 @@ context.objects = [
  ]
  
  context.exec = [

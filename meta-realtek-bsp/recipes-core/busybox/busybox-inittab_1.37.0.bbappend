@@ -1,5 +1,4 @@
-S = "${WORKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 
 do_install:rtl8730e-recovery() {
     install -d ${D}${sysconfdir}

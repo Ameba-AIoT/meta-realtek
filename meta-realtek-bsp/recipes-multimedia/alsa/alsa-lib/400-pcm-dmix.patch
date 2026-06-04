@@ -16,7 +16,7 @@ index 55cae3e..32bbd5c 100644
  	unsigned int src_step, dst_step;
  	unsigned int chn, dchn, channels, sample_size;
  	mix_areas_t *do_mix_areas;
--	
+-
 +	//add tmp area to store data after mixer, then copy the buffer to dma buffer.
 +	snd_pcm_channel_area_t * tmp_area;
 +	tmp_area = (snd_pcm_channel_area_t *)calloc(1, sizeof(snd_pcm_channel_area_t *));

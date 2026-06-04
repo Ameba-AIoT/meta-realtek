@@ -10,7 +10,7 @@ EXTERNALSRC = "${RTKDIR}/tests/benchmark/lmbench3"
 
 DEPENDS += "libtirpc"
 
-CFLAGS += "--sysroot=${STAGING_DIR_HOST} -I${STAGING_INCDIR}/tirpc"
+CFLAGS += "--sysroot=${STAGING_DIR_HOST} -I${STAGING_INCDIR}/tirpc -std=gnu89 -Wno-error=incompatible-pointer-types -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
 LDLIBS = "-L${STAGING_DIR_HOST}/usr/lib -ltirpc "
 LDFLAGS += "${TUNE_CCARGS} ${LDLIBS}"
 

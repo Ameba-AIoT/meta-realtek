@@ -8,13 +8,13 @@ RTKDIR := "${@os.path.abspath(os.path.dirname(d.getVar('FILE', True)) + '/../../
 
 BBLAYERS ?= " \
   ##OEROOT##/meta \
-  ##OEROOT##/meta-poky \
-  ##OEROOT##/meta-yocto-bsp \
-  ##OEROOT##/../meta-openembedded/meta-oe \
-  ##OEROOT##/../meta-realtek/meta-sdk \
-  ##OEROOT##/../meta-realtek/meta-realtek-bsp \
-  ##OEROOT##/../meta-swupdate \
-  ##OEROOT##/../meta-openembedded/meta-python \
-  ##OEROOT##/../meta-openembedded/meta-multimedia \
-  ##OEROOT##/../meta-openembedded/meta-networking \
+  ##OEROOT##/../meta-yocto/meta-poky \
+  ##OEROOT##/../meta-yocto/meta-yocto-bsp \
+  ##OEROOT##/../../meta-openembedded/meta-oe \
+  ##OEROOT##/../../meta-realtek/meta-sdk \
+  ##OEROOT##/../../meta-realtek/meta-realtek-bsp \
+  ##OEROOT##/../../meta-swupdate \
+  ##OEROOT##/../../meta-openembedded/meta-python \
+  ##OEROOT##/../../meta-openembedded/meta-multimedia \
+  ##OEROOT##/../../meta-openembedded/meta-networking \
   "

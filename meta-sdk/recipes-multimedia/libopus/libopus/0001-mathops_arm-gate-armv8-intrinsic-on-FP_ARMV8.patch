@@ -1,0 +1,43 @@
+From: Realtek Ameba SDK <noreply@realtek.com>
+Date: Mon, 18 May 2026 00:00:00 +0800
+Subject: [PATCH] mathops_arm: gate ARMv8 NEON intrinsic on __ARM_FEATURE_FP_ARMV8
+
+vcvtaq_s32_f32 is an ARMv8 ASIMD intrinsic that GCC only exposes when
+the target FPU level supports it. In AArch32 mode that requires
+-mfpu=neon-fp-armv8 (or higher); -mfpu=neon (the ARMv7-A NEON FPU) does
+not expose it even when paired with -march=armv8-a.
+
+The original guard `defined(__ARM_ARCH) && __ARM_ARCH >= 8` selects this
+branch for any ARMv8 core regardless of FPU level, which breaks builds
+on tunes that combine -march=armv8-a with -mfpu=neon (e.g. OE/Yocto's
+cortex-a32 tune):
+
+    error: implicit declaration of function 'vcvtaq_s32_f32'
+    error: incompatible types when returning type 'int' but
+           'int32x4_t' was expected
+
+Switch the guard to `__ARM_FEATURE_FP_ARMV8` (ARM ACLE), which is
+defined by GCC only when the FPU level is sufficient to provide the new
+ARMv8 ASIMD intrinsics. This keeps the optimised path active on AArch64
+and on properly-configured AArch32, and falls back to the portable
+rounding sequence otherwise.
+
+Upstream-Status: Pending
+
+Signed-off-by: Realtek Ameba SDK <noreply@realtek.com>
+---
+ celt/arm/mathops_arm.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/celt/arm/mathops_arm.h b/celt/arm/mathops_arm.h
+--- a/celt/arm/mathops_arm.h
++++ b/celt/arm/mathops_arm.h
+@@ -37,7 +37,7 @@
+
+ static inline int32x4_t vroundf(float32x4_t x)
+ {
+-#  if defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)
++#  if defined(__aarch64__) || defined(__ARM_FEATURE_FP_ARMV8)
+     return vcvtaq_s32_f32(x);
+ #  else
+     uint32x4_t sign = vandq_u32(vreinterpretq_u32_f32(x), vdupq_n_u32(0x80000000));

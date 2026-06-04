@@ -2,7 +2,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:prepend = " \
-    file://0001-pipewire-conf.patch;patchdir=src/daemon \
+    file://0001-pipewire-conf.patch \
 "
 
 RDEPENDS:libpipewire += " \

@@ -35,7 +35,7 @@ if [ "$(whoami)" = "root" ]; then
     return
 fi
 
-OEROOT_DIR=${ROOTDIR}/sources/yocto/poky
+OEROOT_DIR=${ROOTDIR}/sources/yocto/poky/openembedded-core
 RTK_META_DIR=${ROOTDIR}/sources/yocto/meta-realtek
 RTK_PROJECT_DIR=${RTK_META_DIR}/meta-sdk/conf/projects
 
@@ -142,10 +142,10 @@ Realtek Machines: `echo; ls ${ROOTDIR}/sources/yocto/meta-realtek/*/conf/machine
 Realtek Distros: `echo; ls ${ROOTDIR}/sources/yocto/meta-realtek/*/conf/distro/*.conf \
 | sed s/\.conf//g | sed -r 's/^.+\///' | xargs -I% echo -e "\t%"`
 
-Poky's Machines: `echo; ls ${ROOTDIR}/sources/yocto/poky/*/conf/machine/*.conf \
+Poky's Machines: `echo; ls ${ROOTDIR}/sources/yocto/poky/meta-yocto/*/conf/machine/*.conf \
 | sed s/\.conf//g | sed -r 's/^.+\///' | xargs -I% echo -e "\t%"`
 
-Poky's Distros: `echo; ls ${ROOTDIR}/sources/yocto/poky/meta-poky/conf/distro/*.conf \
+Poky's Distros: `echo; ls ${ROOTDIR}/sources/yocto/poky/meta-yocto/meta-poky/conf/distro/*.conf \
 | sed s/\.conf//g | sed -r 's/^.+\///' | xargs -I% echo -e "\t%"`
 "
     fi
