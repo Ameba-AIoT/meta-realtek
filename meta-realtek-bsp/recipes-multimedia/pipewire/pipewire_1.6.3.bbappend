@@ -5,6 +5,10 @@ SRC_URI:prepend = " \
     file://0001-pipewire-conf.patch \
 "
 
+PACKAGECONFIG:class-target:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'bluetooth', 'bluez-lc3', '', d)} \
+"
+
 RDEPENDS:libpipewire += " \
     ${PN}-modules-protocol-native \
     ${PN}-modules-spa-node-factory \
