@@ -61,6 +61,18 @@ do_install () {
             install -m 0755 "$f" ${D}/home/root/nan/
         fi
     done
+
+    for f in ${D}/home/root/nan/*.conf ${D}/home/root/nan/*.sh; do
+        if [ -f "$f" ]; then
+            sed -i \
+                -e 's/\bbash\b/sh/g' \
+                -e 's/\bsudo[[:space:]]*//g' \
+                -e 's#LD_LIBRARY_PATH=\./[[:space:]]\+\./rtw_aware#LD_LIBRARY_PATH=/usr/lib rtw_aware#g' \
+                -e 's#"wpa_supplicant_dbg_para":[[:space:]]*"-dd"#"wpa_supplicant_dbg_para": ""#g' \
+                "$f"
+        fi
+    done
+
 }
 
 do_clean() {
