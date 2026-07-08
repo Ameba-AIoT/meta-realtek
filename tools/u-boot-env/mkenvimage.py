@@ -6,7 +6,7 @@ def create_env_image(input_file, output_file, size):
     command = ['mkenvimage', '-s', size, '-o', output_file, input_file]
 
     try:
-        # Excute: mkenvimage -s 0x1F000 -o u-boot-env.bin boot-env.txt
+        # Excute: mkenvimage -s 0xC000 -o u-boot-env.bin boot-env.txt
         result = subprocess.run(command, check=True)
         print(f"Environment image created successfully at {output_file}")
     except subprocess.CalledProcessError as e:
@@ -17,7 +17,7 @@ def create_env_image(input_file, output_file, size):
 def main():
     input_file = 'u-boot-env.txt'  # Default
     output_file = 'u-boot-env.img'  # Default
-    size = '0x1F000'  # Default
+    size = '0xC000'  # Default
 
     if '-o' in sys.argv:
         o_index = sys.argv.index('-o')
