@@ -22,6 +22,7 @@ SERIAL_CONSOLES ?= "115200;ttyS0 115200;ttyO0 115200;ttyAMA0"
 
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-ameba"
 PREFERRED_VERSION_linux-yocto ?= "6.18%"
+PREFERRED_VERSION_wpa-supplicant = "${@bb.utils.contains('DISTRO_FEATURES', 'nan', '2.10%', '2.11%', d)}"
 
 KERNEL_IMAGETYPE = "uImage"
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
