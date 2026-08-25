@@ -3,6 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:prepend = " \
     file://0001-pipewire-conf.patch \
+    file://0003-spa-alsa-ameba-dual-dma-6-8ch-reorg.patch \
 "
 
 PACKAGECONFIG:class-target:append = " \

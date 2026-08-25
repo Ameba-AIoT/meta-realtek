@@ -3,6 +3,11 @@ require alsa-utils.inc
 # Only needed as the dynamic packaging was altered, remove on upgrade
 PR = "r2"
 
+# Ameba: reorganize 6/8-channel data into the dual-DMA (FIFO0/FIFO1) layout
+# expected by sound/soc/realtek/dma.c when aplay runs in --mmap mode.
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
+SRC_URI += "file://0001-aplay-ameba-dual-dma-6-8ch-mmap-reorg.patch"
+
 # alsa-utils is an empty meta-package
 FILES:${PN} = ""
 ALLOW_EMPTY:${PN} = "1"

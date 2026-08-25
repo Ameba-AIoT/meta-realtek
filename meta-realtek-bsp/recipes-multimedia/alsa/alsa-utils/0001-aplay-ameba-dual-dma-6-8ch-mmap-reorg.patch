@@ -1,0 +1,283 @@
+From: Ameba SDK <noreply@realtek.com>
+Subject: [PATCH] aplay/arecord: Ameba dual-DMA 6/8ch buffer (de)reorg on mmap
+
+Upstream-Status: Pending
+---
+--- a/aplay/aplay.c
++++ b/aplay/aplay.c
+@@ -166,6 +166,256 @@
+ static void playbackv(char **filenames, unsigned int count);
+ static void capturev(char **filenames, unsigned int count);
+ 
++/*
++ * ===========================================================================
++ * Realtek Ameba dual-DMA TDM buffer reorganization for the mmap playback path
++ * ===========================================================================
++ *
++ * On the Ameba SoC, 6/8-channel playback is driven by TWO hardware FIFOs, each
++ * served by its own DMA channel:
++ *     DMA0/FIFO0 -> first 4 channels   (ch0..ch3)
++ *     DMA1/FIFO1 -> remaining channels (ch4..chN-1 : 2 for 6ch, 4 for 8ch)
++ *
++ * The kernel ALSA DMA driver (sound/soc/realtek/dma.c) therefore expects the
++ * DMA ring to be laid out PER PERIOD as two contiguous sub-blocks instead of a
++ * plain N-channel interleaved stream:
++ *
++ *   period p (base = p * period_frames * N * fw) :
++ *     [ period_frames x 4ch  interleaved (ch0..3) ]   <- read by DMA0
++ *     [ period_frames x (N-4)ch interleaved (ch4..)]   <- read by DMA1
++ *
++ * On the read/write (non-mmap) path the kernel does this reshuffle itself in
++ * gdma_write()/gdma_read(). On the mmap path there is NO copy callback: the
++ * application writes straight into the DMA ring, so we must reproduce the very
++ * same reorganization here while filling the mmap area.
++ *
++ * AMEBA_TDM_MMAP_REORG = 1 : enable the reorg (default)
++ * AMEBA_TDM_MMAP_REORG = 0 : passthrough - behave exactly like stock aplay
++ *                            (plain snd_pcm_mmap_writei), reorg compiled out.
++ */
++#ifndef AMEBA_TDM_MMAP_REORG
++#define AMEBA_TDM_MMAP_REORG 1
++#endif
++
++static snd_pcm_sframes_t ameba_reorg_mmap_writei(snd_pcm_t *pcm,
++						 const void *buffer,
++						 snd_pcm_uframes_t size)
++{
++#if AMEBA_TDM_MMAP_REORG
++	unsigned int ch = hwparams.channels;
++
++	/* Only 6/8 channels use the dual-DMA split. */
++	if (ch == 6 || ch == 8) {
++		/* one-shot confirmation that this patched aplay is running */
++		static int ameba_logged = 0;
++		if (!ameba_logged) {
++			fprintf(stderr, "[ameba] aplay dual-DMA 6/8ch mmap reorg ACTIVE (patch loaded)\n");
++			ameba_logged = 1;
++		}
++		const unsigned int first_ch = 4;		/* -> DMA0 */
++		const unsigned int last_ch  = ch - first_ch;	/* -> DMA1 */
++		const unsigned int fw = snd_pcm_format_physical_width(hwparams.format) / 8;
++		const snd_pcm_uframes_t psize = chunk_size;	/* period size (frames) */
++		const uint8_t *src = buffer;
++		snd_pcm_uframes_t xfer = 0;
++		static snd_pcm_uframes_t start_thres;
++		static int start_thres_valid = 0;
++
++		/* Cache the start threshold once (mirror snd_pcm_write_areas). */
++		if (!start_thres_valid) {
++			snd_pcm_sw_params_t *sw;
++			snd_pcm_sw_params_alloca(&sw);
++			if (snd_pcm_sw_params_current(pcm, sw) == 0)
++				snd_pcm_sw_params_get_start_threshold(sw, &start_thres);
++			else
++				start_thres = buffer_frames;
++			start_thres_valid = 1;
++		}
++
++		while (xfer < size) {
++			const snd_pcm_channel_area_t *areas;
++			snd_pcm_uframes_t offset, frames, k;
++			snd_pcm_sframes_t avail, committed;
++			snd_pcm_state_t state;
++			uint8_t *ring;
++			int err;
++
++			state = snd_pcm_state(pcm);
++			if (state == SND_PCM_STATE_XRUN)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : -EPIPE;
++			if (state == SND_PCM_STATE_SUSPENDED)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : -ESTRPIPE;
++
++			avail = snd_pcm_avail_update(pcm);
++			if (avail < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : avail;
++
++			frames = size - xfer;
++			if (frames > (snd_pcm_uframes_t)avail)
++				frames = (snd_pcm_uframes_t)avail;
++
++			if (frames == 0) {
++				/* no room: honour (non)blocking like mmap_writei */
++				if (nonblock)
++					return xfer > 0 ? (snd_pcm_sframes_t)xfer : -EAGAIN;
++				err = snd_pcm_wait(pcm, -1);
++				if (err < 0)
++					return xfer > 0 ? (snd_pcm_sframes_t)xfer : err;
++				continue;
++			}
++
++			err = snd_pcm_mmap_begin(pcm, &areas, &offset, &frames);
++			if (err < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : err;
++			if (frames == 0)
++				continue;
++
++			/* Base of the DMA ring (interleaved area, channel 0). */
++			ring = (uint8_t *)areas[0].addr + areas[0].first / 8;
++
++			/* Reorganize interleaved src frames into the two per-period
++			 * DMA sub-blocks, indexed by the absolute ring frame. */
++			for (k = 0; k < frames; k++) {
++				snd_pcm_uframes_t f   = offset + k;	/* ring frame */
++				snd_pcm_uframes_t p   = f / psize;	/* period idx */
++				snd_pcm_uframes_t fip = f % psize;	/* frame in period */
++				uint8_t *pbase = ring + p * psize * ch * fw;
++				const uint8_t *sfrm = src + (xfer + k) * ch * fw;
++
++				/* first 4 channels -> DMA0 sub-block */
++				memcpy(pbase + fip * first_ch * fw,
++				       sfrm, first_ch * fw);
++				/* remaining channels -> DMA1 sub-block */
++				memcpy(pbase + psize * first_ch * fw + fip * last_ch * fw,
++				       sfrm + first_ch * fw, last_ch * fw);
++			}
++
++			committed = snd_pcm_mmap_commit(pcm, offset, frames);
++			if (committed < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : committed;
++
++			/* Auto-start once enough frames are buffered. */
++			if (state == SND_PCM_STATE_PREPARED) {
++				snd_pcm_sframes_t hw_avail =
++					(snd_pcm_sframes_t)buffer_frames - avail + committed;
++				if (hw_avail >= 0 &&
++				    (snd_pcm_uframes_t)hw_avail >= start_thres)
++					snd_pcm_start(pcm);
++			}
++
++			xfer += committed;
++		}
++
++		return (snd_pcm_sframes_t)xfer;
++	}
++#endif /* AMEBA_TDM_MMAP_REORG */
++
++	/* passthrough: stock interleaved mmap write */
++	return snd_pcm_mmap_writei(pcm, buffer, size);
++}
++
++/*
++ * Capture counterpart of ameba_reorg_mmap_writei(): the DMA ring holds the
++ * per-period two-sub-block layout ([P*4ch][P*(N-4)ch]); on the mmap capture
++ * path we de-reorganize it back into standard N-channel interleaved frames.
++ * Mirrors the kernel gdma_read() gather. Guarded by the same macro.
++ */
++static snd_pcm_sframes_t ameba_reorg_mmap_readi(snd_pcm_t *pcm,
++						void *buffer,
++						snd_pcm_uframes_t size)
++{
++#if AMEBA_TDM_MMAP_REORG
++	unsigned int ch = hwparams.channels;
++
++	if (ch == 6 || ch == 8) {
++		const unsigned int first_ch = 4;		/* <- DMA0 */
++		const unsigned int last_ch  = ch - first_ch;	/* <- DMA1 */
++		const unsigned int fw = snd_pcm_format_physical_width(hwparams.format) / 8;
++		const snd_pcm_uframes_t psize = chunk_size;	/* period size (frames) */
++		uint8_t *dst = buffer;
++		snd_pcm_uframes_t xfer = 0;
++		static int ameba_logged_r = 0;
++
++		if (!ameba_logged_r) {
++			fprintf(stderr, "[ameba] arecord dual-DMA 6/8ch mmap de-reorg ACTIVE (patch loaded)\n");
++			ameba_logged_r = 1;
++		}
++
++		while (xfer < size) {
++			const snd_pcm_channel_area_t *areas;
++			snd_pcm_uframes_t offset, frames, k;
++			snd_pcm_sframes_t avail, committed;
++			snd_pcm_state_t state;
++			uint8_t *ring;
++			int err;
++
++			state = snd_pcm_state(pcm);
++			if (state == SND_PCM_STATE_PREPARED) {
++				/* capture must be started to fill the ring */
++				err = snd_pcm_start(pcm);
++				if (err < 0)
++					return xfer > 0 ? (snd_pcm_sframes_t)xfer : err;
++			} else if (state == SND_PCM_STATE_XRUN) {
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : -EPIPE;
++			} else if (state == SND_PCM_STATE_SUSPENDED) {
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : -ESTRPIPE;
++			}
++
++			avail = snd_pcm_avail_update(pcm);
++			if (avail < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : avail;
++
++			frames = size - xfer;
++			if (frames > (snd_pcm_uframes_t)avail)
++				frames = (snd_pcm_uframes_t)avail;
++
++			if (frames == 0) {
++				if (nonblock)
++					return xfer > 0 ? (snd_pcm_sframes_t)xfer : -EAGAIN;
++				err = snd_pcm_wait(pcm, -1);
++				if (err < 0)
++					return xfer > 0 ? (snd_pcm_sframes_t)xfer : err;
++				continue;
++			}
++
++			err = snd_pcm_mmap_begin(pcm, &areas, &offset, &frames);
++			if (err < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : err;
++			if (frames == 0)
++				continue;
++
++			ring = (uint8_t *)areas[0].addr + areas[0].first / 8;
++
++			/* de-reorg: gather first 4 ch from DMA0 sub-block and the
++			 * remaining channels from DMA1 sub-block into interleaved dst */
++			for (k = 0; k < frames; k++) {
++				snd_pcm_uframes_t f   = offset + k;	/* ring frame */
++				snd_pcm_uframes_t p   = f / psize;
++				snd_pcm_uframes_t fip = f % psize;
++				uint8_t *pbase = ring + p * psize * ch * fw;
++				uint8_t *dfrm = dst + (xfer + k) * ch * fw;
++
++				memcpy(dfrm, pbase + fip * first_ch * fw, first_ch * fw);
++				memcpy(dfrm + first_ch * fw,
++				       pbase + psize * first_ch * fw + fip * last_ch * fw,
++				       last_ch * fw);
++			}
++
++			committed = snd_pcm_mmap_commit(pcm, offset, frames);
++			if (committed < 0)
++				return xfer > 0 ? (snd_pcm_sframes_t)xfer : committed;
++
++			xfer += committed;
++		}
++
++		return (snd_pcm_sframes_t)xfer;
++	}
++#endif /* AMEBA_TDM_MMAP_REORG */
++
++	/* passthrough: stock interleaved mmap read */
++	return snd_pcm_mmap_readi(pcm, buffer, size);
++}
++
+ static void begin_voc(int fd, size_t count);
+ static void end_voc(int fd);
+ static void begin_wave(int fd, size_t count);
+@@ -882,8 +1132,18 @@
+ 	}
+ 
+ 	if (mmap_flag) {
++#if AMEBA_TDM_MMAP_REORG
++		/* Reorganize 6/8-ch data into the dual-DMA layout on mmap writes. */
++		writei_func = ameba_reorg_mmap_writei;
++#else
+ 		writei_func = snd_pcm_mmap_writei;
++#endif
++#if AMEBA_TDM_MMAP_REORG
++		/* De-reorganize 6/8-ch data from the dual-DMA layout on mmap reads. */
++		readi_func = ameba_reorg_mmap_readi;
++#else
+ 		readi_func = snd_pcm_mmap_readi;
++#endif
+ 		writen_func = snd_pcm_mmap_writen;
+ 		readn_func = snd_pcm_mmap_readn;
+ 	} else {

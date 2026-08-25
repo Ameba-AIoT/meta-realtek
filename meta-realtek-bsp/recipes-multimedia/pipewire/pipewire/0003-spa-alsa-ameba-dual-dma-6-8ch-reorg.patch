@@ -1,0 +1,170 @@
+From: Ameba SDK <noreply@realtek.com>
+Subject: [PATCH] spa/alsa: Ameba dual-DMA 6/8ch (de)reorg (mmap/no-period-wakeup, playback+capture)
+
+Upstream-Status: Pending
+---
+--- a/spa/plugins/alsa/alsa-pcm.c
++++ b/spa/plugins/alsa/alsa-pcm.c
+@@ -3221,6 +3221,123 @@
+ 	return 0;
+ }
+ 
++/*
++ * ===========================================================================
++ * Realtek Ameba dual-DMA TDM buffer reorganization (mmap / no-period-wakeup)
++ * ===========================================================================
++ *
++ * On the Ameba SoC, 6/8-channel playback is fed by TWO hardware FIFOs / DMA
++ * channels: DMA0 carries the first 4 channels, DMA1 carries the remaining
++ * (channels-4). The kernel ALSA DMA driver (sound/soc/realtek/dma.c) therefore
++ * expects each period in the mmap DMA ring to be laid out as two contiguous
++ * sub-blocks instead of a plain N-channel interleaved stream:
++ *
++ *   period p (base = p * P * N * fw) :
++ *     [ P frames x 4ch  interleaved (ch0..3) ]   <- read by DMA0
++ *     [ P frames x (N-4)ch interleaved (ch4..)]   <- read by DMA1
++ *
++ * PipeWire drives this device with SND_PCM_INFO_NO_PERIOD_WAKEUP (timer based,
++ * no per-period IRQ) and copies straight into the mmap ring in
++ * alsa_write_frames(). That copy is a normal interleaved memcpy, which does NOT
++ * produce the layout above, so 6/8 channels come out scrambled. We reorganize
++ * the samples here, mirroring the kernel's gdma_write() reshuffle.
++ *
++ * AMEBA_TDM_MMAP_REORG = 1 : enable reorg (default)
++ * AMEBA_TDM_MMAP_REORG = 0 : passthrough - stock interleaved copy, compiled out.
++ */
++#ifndef AMEBA_TDM_MMAP_REORG
++#define AMEBA_TDM_MMAP_REORG 1
++#endif
++
++#if AMEBA_TDM_MMAP_REORG
++static inline int ameba_tdm_reorg_needed(struct state *state)
++{
++	/* interleaved 6/8-ch only; the SPORT/DMA path is interleaved-only */
++	return !state->planar && (state->channels == 6 || state->channels == 8);
++}
++
++/* Reorganize n_frames of interleaved src into the two per-period DMA sub-blocks
++ * of the mmap ring, indexed by the absolute ring frame (ring_off + k). */
++static inline void ameba_tdm_reorg_write(struct state *state,
++		const snd_pcm_channel_area_t *area, snd_pcm_uframes_t ring_off,
++		const void *src, snd_pcm_uframes_t n_frames)
++{
++	const unsigned int N = (unsigned int) state->channels;
++	const unsigned int first_ch = 4;		/* -> DMA0 */
++	const unsigned int last_ch  = N - first_ch;	/* -> DMA1 */
++	const unsigned int fw = (unsigned int)(state->frame_size / N);
++	const snd_pcm_uframes_t P = state->period_frames;
++	uint8_t *ring = channel_area_addr(area, 0);
++	const uint8_t *s = src;
++	snd_pcm_uframes_t k;
++
++	/* one-shot confirmation that this patched pipewire alsa plugin is running */
++	static int ameba_logged = 0;
++	if (!ameba_logged) {
++		spa_log_warn(state->log, "%s: [ameba] dual-DMA 6/8ch reorg ACTIVE (patch loaded)", state->name);
++		ameba_logged = 1;
++	}
++
++	for (k = 0; k < n_frames; k++) {
++		snd_pcm_uframes_t F   = ring_off + k;	/* ring frame */
++		snd_pcm_uframes_t p   = F / P;		/* period index */
++		snd_pcm_uframes_t fip = F % P;		/* frame in period */
++		uint8_t *pbase = ring + (size_t) p * P * N * fw;
++		const uint8_t *sfrm = s + (size_t) k * N * fw;
++
++		/* first 4 channels -> DMA0 sub-block */
++		memcpy(pbase + (size_t) fip * first_ch * fw,
++		       sfrm, first_ch * fw);
++		/* remaining channels -> DMA1 sub-block */
++		memcpy(pbase + (size_t) P * first_ch * fw + (size_t) fip * last_ch * fw,
++		       sfrm + first_ch * fw, last_ch * fw);
++	}
++}
++/* Capture counterpart of ameba_tdm_reorg_write(): the DMA ring holds the
++ * per-period [P*4ch][P*(N-4)ch] layout; de-reorganize it back into standard
++ * N-channel interleaved frames. Frame index wraps at buffer_frames so a single
++ * call may straddle the ring end (push_frames reads up to a full buffer). */
++static inline void ameba_tdm_dereorg_read(struct state *state,
++		const snd_pcm_channel_area_t *area, snd_pcm_uframes_t ring_off,
++		void *dst, snd_pcm_uframes_t n_frames)
++{
++	const unsigned int N = (unsigned int) state->channels;
++	const unsigned int first_ch = 4;		/* <- DMA0 */
++	const unsigned int last_ch  = N - first_ch;	/* <- DMA1 */
++	const unsigned int fw = (unsigned int)(state->frame_size / N);
++	const snd_pcm_uframes_t P = state->period_frames;
++	const snd_pcm_uframes_t BUF = state->buffer_frames;
++	uint8_t *ring = channel_area_addr(area, 0);
++	uint8_t *d = dst;
++	snd_pcm_uframes_t k;
++	static int ameba_logged_r = 0;
++
++	if (!ameba_logged_r) {
++		spa_log_warn(state->log, "%s: [ameba] dual-DMA 6/8ch capture de-reorg ACTIVE (patch loaded)", state->name);
++		ameba_logged_r = 1;
++	}
++
++	for (k = 0; k < n_frames; k++) {
++		snd_pcm_uframes_t f = ring_off + k;
++		snd_pcm_uframes_t p, fip;
++		uint8_t *pbase, *dfrm;
++
++		if (f >= BUF)			/* wrap at ring end */
++			f -= BUF;
++		p   = f / P;
++		fip = f % P;
++		pbase = ring + (size_t) p * P * N * fw;
++		dfrm  = d + (size_t) k * N * fw;
++
++		memcpy(dfrm, pbase + (size_t) fip * first_ch * fw, first_ch * fw);
++		memcpy(dfrm + first_ch * fw,
++		       pbase + (size_t) P * first_ch * fw + (size_t) fip * last_ch * fw,
++		       last_ch * fw);
++	}
++}
++
++#endif /* AMEBA_TDM_MMAP_REORG */
++
+ static int alsa_write_frames(struct state *state)
+ {
+ 	snd_pcm_t *hndl = state->hndl;
+@@ -3270,6 +3387,13 @@
+ 		n_bytes = n_frames * frame_size;
+ 
+ 		if (SPA_LIKELY(state->use_mmap)) {
++#if AMEBA_TDM_MMAP_REORG
++			if (ameba_tdm_reorg_needed(state)) {
++				/* interleaved: single data plane, reorg 6/8-ch */
++				ameba_tdm_reorg_write(state, &my_areas[0], off,
++						SPA_PTROFF(d[0].data, offs, void), n_frames);
++			} else
++#endif
+ 			for (i = 0; i < b->buf->n_datas; i++) {
+ 				spa_memcpy(channel_area_addr(&my_areas[i], off),
+ 						SPA_PTROFF(d[i].data, offs, void), n_bytes);
+@@ -3389,6 +3513,16 @@
+ 		n_bytes = total_frames * frame_size;
+ 
+ 		if (my_areas) {
++#if AMEBA_TDM_MMAP_REORG
++			if (ameba_tdm_reorg_needed(state)) {
++				ameba_tdm_dereorg_read(state, &my_areas[0], offset,
++						d[0].data, total_frames);
++				d[0].chunk->offset = 0;
++				d[0].chunk->size = n_bytes;
++				d[0].chunk->stride = frame_size;
++			} else
++#endif
++			{
+ 			left = state->buffer_frames - offset;
+ 			l0 = SPA_MIN(n_bytes, left * frame_size);
+ 			l1 = n_bytes - l0;
+@@ -3405,6 +3539,7 @@
+ 				d[i].chunk->size = n_bytes;
+ 				d[i].chunk->stride = frame_size;
+ 			}
++			}
+ 		} else {
+ 			void *bufs[b->buf->n_datas];
+ 			for (i = 0; i < b->buf->n_datas; i++) {
