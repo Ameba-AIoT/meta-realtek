@@ -20,6 +20,13 @@ SRC_URI:append:rtl8730eam-va6 =" \
     file://init.cfg \
     file://tools.cfg \
 "
+SRC_URI:append:rtl8730eah-vd3 =" \
+    file://init.cfg \
+    file://tools.cfg \
+    file://mdev.cfg \
+    file://vd3-busybox-init.cfg \
+    file://rcS-xip \
+"
 
 do_prepare_config:rtl8730e-recovery () {
 	export KCONFIG_NOTIMESTAMP=1
@@ -40,4 +47,11 @@ do_prepare_config:rtl8730e-recovery () {
 	if [ -n "${DEBUG_PREFIX_MAP}" ]; then
 		sed -i 's|${DEBUG_PREFIX_MAP}||g' ${S}/.config
 	fi
+}
+
+
+# vd3: overwrite the shared /etc/init.d/rcS (which is the recovery script that
+# reboot-loops on normal boot) with the minimal XIP rcS. recovery keeps its own.
+do_install:append:rtl8730eah-vd3 () {
+    install -D -m 0755 ${UNPACKDIR}/rcS-xip ${D}${sysconfdir}/init.d/rcS
 }

@@ -49,6 +49,34 @@ IMAGE_INSTALL:remove:rtl8730eam-va6 = " \
     lv-drivers \
 "
 
+# vd3 flash diet: strip unused base packages (BT/audio/media/USB/adb/rng-tools)
+# to fit the 8MB rootfs. Scoped to vd3 so va6/va7/va8 keep the full image.
+IMAGE_INSTALL:remove:rtl8730eah-vd3 = " \
+    packagegroup-rtk-network \
+    packagegroup-rtk-multimedia \
+    packagegroup-rtk-commands \
+    rng-tools \
+    rng-tools-service \
+    recoveryd \
+    adbd \
+    alsa-lib \
+    alsa-utils \
+    hciattach \
+    bluez5 \
+    rtlbtmp \
+    udev-extraconf \
+    lvgl \
+    lv-drivers \
+    rtk-gui \
+"
+
+# WiFi userspace for vd3: just wpa-supplicant + dhcpcd + iperf3 (shrunk via
+# bbappends), not the rest of packagegroup-rtk-network.
+IMAGE_INSTALL:append:rtl8730eah-vd3 = " \
+    wpa-supplicant \
+    iperf3 \
+"
+
 inherit core-image
 
 ROOTFS_POSTPROCESS_COMMAND += '${@bb.utils.contains("IMAGE_FEATURES", "read-only-rootfs-delayed-postinsts", "remove_unneeded_files; ", "",d)}'

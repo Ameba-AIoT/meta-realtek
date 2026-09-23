@@ -231,7 +231,17 @@ function m()
 
     cp -f ${deploy_dir}/uImage ${deploy_dir}/kernel.img
 
-    if [[ "${TARGET_MACHINE}" = "rtl8730eah-va6" || "${TARGET_MACHINE}" = "rtl8730eam-va6" ]]; then
+    if [[ "${TARGET_MACHINE}" = "rtl8730eah-vd3" ]]; then
+        # vd3 NOR+XIP: prefer cramfs-xip (XIP from NOR window), fall back to squashfs-xz.
+        if [ -e ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.cramfs-xip ]; then
+            cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.cramfs-xip ${deploy_dir}/rootfs.img
+        else
+            cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.squashfs-xz ${deploy_dir}/rootfs.img
+        fi
+        if [ -e ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.jffs2 ]; then
+            cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.jffs2 ${deploy_dir}/userdata.img
+        fi
+    elif [[ "${TARGET_MACHINE}" = "rtl8730eah-va6" || "${TARGET_MACHINE}" = "rtl8730eam-va6" ]]; then
         cp -f ${deploy_dir}/ameba-image-core-${TARGET_MACHINE}.rootfs.squashfs-xz ${deploy_dir}/rootfs.img
         cp -f ${deploy_dir}/ameba-image-userdata-${TARGET_MACHINE}.userdata.jffs2 ${deploy_dir}/userdata.img
     else
@@ -297,7 +307,7 @@ function mfw()
     local deploy_dir=${BUILDDIR}/tmp/deploy/images/${TARGET_MACHINE}
 
     if [ "$1" = "menuconfig" ]; then
-        $fw_build -s $fw_source -b menuconfig -c $chip_info
+        TARGET_MACHINE=${TARGET_MACHINE} $fw_build -s $fw_source -b menuconfig -c $chip_info
         return
     fi
 
@@ -313,7 +323,7 @@ function mfw()
     fi
 
     echo_info "=> Build firmware: $fw_build -s $fw_source -b $build_target -c $chip_info"
-    $fw_build -s $fw_source -b $build_target -c $chip_info
+    TARGET_MACHINE=${TARGET_MACHINE} $fw_build -s $fw_source -b $build_target -c $chip_info
     if [ $? -ne 0 ]; then
         echo_error "***************************************"
         echo_error "Build $build_target firmware error!!!"

@@ -1,0 +1,18 @@
+#!/bin/sh
+# vd3 XIP rootfs rcS (busybox init ::sysinit). MUST exit 0, MUST NOT reboot.
+
+# Smaller default thread-stack rlimit: saves VA/committed pages per thread on
+# this ~6.7MB board. Only covers rcS' own children -- see /etc/profile.d for the
+# login-shell side (getty is spawned by init, not by rcS, so it can't inherit).
+ulimit -s 1024
+
+# Register mdev as hotplug handler only; skip `mdev -s` coldplug (devtmpfs
+# already populated /dev, and the scan would pull ~1.5MB of sysfs into Slab).
+if [ -w /proc/sys/kernel/hotplug ]; then
+	echo /sbin/mdev > /proc/sys/kernel/hotplug
+fi
+
+# Banner
+[ -f /etc/motd ] && cat /etc/motd
+
+exit 0

@@ -55,15 +55,26 @@ function enable_linux_config()
 
     local LINUX_FW_EN_STRING="CONFIG_LINUX_FW_EN=y"
     local MP_NOT_INCLUDE_STRING="CONFIG_MP_INCLUDED=n"
+    # IMG2 run location: vd3 runs XIP from NOR, every other machine keeps the
+    # Kconfig default PSRAM. Written explicitly either way -- .config persists
+    # between builds, so omitting it would inherit the previous machine's choice.
+    local IMG2_STRING="CONFIG_IMG2_PSRAM=y"
+    if [ "${TARGET_MACHINE}" = "rtl8730eah-vd3" ]; then
+        IMG2_STRING="CONFIG_IMG2_FLASH=y"
+    fi
     if [ ! -z ${FW_SRC_DIR}/${PARA_FILENAME} ]; then
         echo "$LINUX_FW_EN_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
         echo "$MP_NOT_INCLUDE_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+        echo "$IMG2_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
     else
         if ! grep -q "$LINUX_FW_EN_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
             echo "$LINUX_FW_EN_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
         fi
         if ! grep -q "$MP_NOT_INCLUDE_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
             echo "$MP_NOT_INCLUDE_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
+        fi
+        if ! grep -q "$IMG2_STRING" ${FW_SRC_DIR}/${PARA_FILENAME}; then
+            echo "$IMG2_STRING" >> ${FW_SRC_DIR}/${PARA_FILENAME}
         fi
     fi
 

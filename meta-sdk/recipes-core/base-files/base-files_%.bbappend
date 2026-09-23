@@ -14,6 +14,8 @@ SRC_URI:append = " \
     file://udisk_remove.sh \
 "
 
+SRC_URI:append:rtl8730eah-vd3 = " file://vd3-ulimit.sh file://vd3-login.sh"
+
 do_install:append:rtl8730eah-va6() {
     echo "/dev/mtdblock8          /mnt              jffs2      defaults              0  0" >> ${D}${sysconfdir}/fstab
     install -m 0644 ${S}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
@@ -24,6 +26,26 @@ do_install:append:rtl8730eam-va6() {
     echo "/dev/mtdblock8          /mnt              jffs2      defaults              0  0" >> ${D}${sysconfdir}/fstab
     install -m 0644 ${S}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
     install -m 0755 ${S}/usb.sh ${D}${base_bindir}/usb.sh
+}
+
+do_install:append:rtl8730eah-vd3() {
+    # XIP bring-up: userdata (jffs2) auto-mount removed (mtd-rom shifts mtdblockN
+    # indices); re-enable later by resolving the partition by label.
+    install -m 0644 ${S}/udhcpd.conf ${D}${sysconfdir}/udhcpd.conf
+    install -m 0755 ${S}/usb.sh ${D}${base_bindir}/usb.sh
+
+    # Mount /tmp as tmpfs: the rootfs is read-only cramfs-xip and the shared
+    # fstab only lists /run and /var/volatile, so /tmp would stay read-only.
+    echo "tmpfs                /tmp                 tmpfs      mode=1777,nodev,nosuid,size=512k   0  0" >> ${D}${sysconfdir}/fstab
+
+    # Smaller default stack rlimit for the login shell and its children; rcS
+    # cannot cover them because getty is spawned by init, not by rcS.
+    install -d ${D}${sysconfdir}/profile.d
+    install -m 0644 ${S}/vd3-ulimit.sh ${D}${sysconfdir}/profile.d/vd3-ulimit.sh
+
+    # getty execs this instead of /bin/sh (see busybox-inittab bbappend): a
+    # non-login shell never reads /etc/profile, so set the rlimit here.
+    install -m 0755 ${S}/vd3-login.sh ${D}${sysconfdir}/vd3-login.sh
 }
 
 do_install:append:rtl8730elm-va7() {
